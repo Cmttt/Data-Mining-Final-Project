@@ -1,0 +1,199 @@
+---
+title: "DM_project"
+author: "Bai Xue"
+date: "12/8/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load Librarys
+```{r}
+library(ggplot2)
+library(plyr)
+library(ISLR)
+library(MASS)
+library(knitr)
+library(gam)
+library(readr)
+library(glmnet)
+library(rmarkdown)
+```
+
+## Read in data and read convert values to 0/1/NA
+```{r, warning=FALSE, message = FALSE}
+#linear regression
+elementary <- read_csv("elementary.csv")
+
+middle <- read_csv("middle.csv")
+
+high <- read_csv("high.csv")
+
+#elementary <- read_csv("/Users/xb/Desktop/Data Mining project/elementary.csv")
+#elementary <- read_csv("/Users/leonshi/Desktop/Data Mining/Final Project/elementary.csv")
+#middle <- read_csv("/Users/leonshi/Desktop/Data Mining/Final Project/middle.csv")
+#high <- read_csv("/Users/leonshi/Desktop/Data Mining/Final Project/high.csv")
+
+#elementary.reg <- transform(elementary, 
+                 # API = mapvalues(API, c("Low","High","?"), 
+                    #                 c(0, 1, NA)))
+```
+
+#Create Transformation Functions
+```{r}
+#to transform and clean API
+APITransform <- function(dataset){
+  if(is.data.frame(dataset)){
+  dataset <- transform(dataset, 
+                  API = mapvalues(API, c("Low","High","?"), 
+                                     c(0, 1, NA)))
+   #Change ? to NA
+   dataset[dataset == "?"] <- NA
+      
+  #This removes rows where API has null values
+  dataset <- dataset[-which(is.na(dataset$API)), ]
+  return(dataset)
+  }
+}
+  
+
+#Categorical Changes
+ ChangeCategorical <-function(dataset){
+     if(is.data.frame(dataset)){
+        
+       #Change to numeric 
+        dataset$ACS_CORE <- as.numeric(dataset$ACS_CORE)
+      
+       #Find the median(for ACS_CORE)
+        median.ASC<- median(dataset$ACS_CORE, na.rm = TRUE)
+        max.ASC <- max(dataset$ACS_CORE,na.rm = TRUE)
+        dataset$ACS_CORE <- cut(dataset$ACS_CORE, c(1, median.ASC + 1, max.ASC),labels
+                                     = FALSE)
+        dataset$ACS_CORE[is.na(dataset$ACS_CORE)] <- 3
+      
+       #change ACS_CORE to categorical
+        dataset$ACS_CORE <- factor(dataset$ACS_CORE)
+      
+       # Change Charter
+        dataset$CHARTER[is.na(dataset$CHARTER)] <- 0
+        dataset$CHARTER[dataset$CHARTER == "Y"] <- 1
+        dataset$CHARTER[dataset$CHARTER == "D"] <- 2
+        #change Year Round
+        dataset$YR_RND[is.na(dataset$YR_RND)] <- 2
+        dataset$YR_RND[dataset$YR_RND == "Yes"] <- 0
+        dataset$YR_RND[dataset$YR_RND == "No"] <- 1
+
+        #change to categorical
+        dataset$CHARTER <- factor(dataset$CHARTER)
+        dataset$YR_RND <- factor(dataset$YR_RND)
+          
+        #Change null values to 6
+        dataset$AVG_ED[is.na(dataset$AVG_ED)] <- 6
+        dataset$AVG_ED <- as.numeric(dataset$AVG_ED)
+        dataset$AVG_ED <- round(dataset$AVG_ED, digits = 0)
+
+        dataset$AVG_ED <- as.factor(dataset$AVG_ED)
+        
+        #Converting the Columns 
+        dataset$API <- factor(dataset$API)
+        dataset$VALID <- as.numeric(dataset$VALID)
+        dataset$NUMTEACH <- as.numeric(dataset$NUMTEACH)
+        dataset$FULL_PCT <- as.numeric(dataset$FULL_PCT)
+        dataset$EMER_PCT <- as.numeric(dataset$EMER_PCT)
+        dataset$WVR_PCT <- as.numeric(dataset$WVR_PCT)
+        dataset$YRS_TEACH <- as.numeric(dataset$YRS_TEACH)
+        dataset$YRONE_TCH <- as.numeric(dataset$YRONE_TCH)
+        dataset$YRTWO_TCH <- as.numeric(dataset$YRTWO_TCH)
+       
+       return(dataset)
+     }
+ }
+
+```
+
+#Transform Data
+```{r}
+elementary.reg = APITransform(elementary)
+elementary.reg = ChangeCategorical(elementary.reg)
+
+high.reg = APITransform(high)
+high.reg = ChangeCategorical(high.reg)
+
+middle.reg = APITransform(middle)
+middle.reg = ChangeCategorical(middle.reg)
+```
+
+
+#Logistic regression-Elementary School 
+
+```{r}
+#Logistic regression 
+elementary.log <- glm(API ~., family = binomial, data = elementary.reg) 
+elemLog.summary <- summary(elementary.log)
+kable(elemLog.summary$coefficients)
+
+```
+
+#Logistic Regression - Middle School
+```{r}
+middle.log <- glm(API ~., family = binomial, data = middle.reg) 
+kable(summary(middle.log)$coefficients )
+```
+
+
+```{r}
+high.log <- glm(API ~., family = binomial, data = high.reg) 
+kable(summary(high.log)$coefficients)
+```
+
+```{r}
+#removing all rows where API is null
+elementary.reg2 = elementary.reg
+
+x <- model.matrix(API~.,elementary.reg2)[,-1]
+y <- as.matrix(data.frame(elementary.reg$API))
+
+# Split data into test and train
+set.seed(1)
+elem.train <- sample(1:nrow(x), nrow(x)/2)
+elem.test <- (-elem.train)
+#y.test <- y[test]
+
+# If we want to specify the number of lambda values - not sure we actually need this
+# Predefined grid of lambda values: 
+# grid=10^seq(10,-2, length =100)
+
+#lasso
+elem.glm <- glmnet(x[elem.train,],y[elem.train],family = "binomial",alpha=1) 
+elem.glm
+#Plot the lasso
+plot(elem.glm)
+```
+
+#To do......
+#Convert year round to categorical-DONE LS
+#Round Education and turn to categorical (current null = 6)
+#plot(elementary.log)
+#Check conditional probabilities with 
+#Classifiers
+#Logistic Lasso (Which ones are selected that are different than zero): Convert model to matrix model. Model.matrix. 
+#Forward Selection.
+#Clustering
+
+## Including Plots
+
+```{r}
+
+```
+
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
