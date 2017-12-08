@@ -30,15 +30,6 @@ elementary <- read_csv("elementary.csv")
 middle <- read_csv("middle.csv")
 
 high <- read_csv("high.csv")
-
-#elementary <- read_csv("/Users/xb/Desktop/Data Mining project/elementary.csv")
-#elementary <- read_csv("/Users/leonshi/Desktop/Data Mining/Final Project/elementary.csv")
-#middle <- read_csv("/Users/leonshi/Desktop/Data Mining/Final Project/middle.csv")
-#high <- read_csv("/Users/leonshi/Desktop/Data Mining/Final Project/high.csv")
-
-#elementary.reg <- transform(elementary, 
-                 # API = mapvalues(API, c("Low","High","?"), 
-                    #                 c(0, 1, NA)))
 ```
 
 #Create Transformation Functions
