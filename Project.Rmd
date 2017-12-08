@@ -164,6 +164,29 @@ elem.glm
 plot(elem.glm)
 ```
 
+
+#Determining coeffcients and significant predictors using lasso
+```{r}
+#Figuring out the minimum lambda value and predicting CV error on test
+elem.bestlam=elem.out$lambda.min
+elem.1se=elem.out$lambda.1se
+elem.lasso.pred=predict(elem.glm,s=elem.bestlam,newx=x[test,])
+print("Minimum lambda for Elementary")
+elem.bestlam
+print("1SE lambda for Elementary")
+elem.1se
+print("CV Error for Elementary")
+mean((elem.lasso.pred-y.test)^2)
+
+#Determine which variables are non-zero at the 1se value of lambda
+out=glmnet(x,y,alpha=1,family="binomial")
+elem.lasso.coef=predict(out,type="coefficients",s=elem.1se)
+elem.lasso.coef
+elem.lasso.coef[elem.lasso.coef!=0]
+```
+
+
+
 #Lasso for Middle School
 ```{r}
 #removing all rows where API is null
