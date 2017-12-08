@@ -148,16 +148,17 @@ high.log <- glm(API ~., family = binomial, data = high.reg)
 kable(summary(high.log)$coefficients)
 ```
 
+#lasso for Elementary
 ```{r}
 #removing all rows where API is null
 elementary.reg2 = elementary.reg
 
-x <- model.matrix(API~.,elementary.reg2)[,-1]
-y <- as.matrix(data.frame(elementary.reg$API))
+elem.x <- model.matrix(API~.,elementary.reg2)[,-1]
+elem.y <- as.matrix(data.frame(elementary.reg$API))
 
 # Split data into test and train
 set.seed(1)
-elem.train <- sample(1:nrow(x), nrow(x)/2)
+elem.train <- sample(1:nrow(elem.x), nrow(elem.x)/2)
 elem.test <- (-elem.train)
 #y.test <- y[test]
 
@@ -166,12 +167,61 @@ elem.test <- (-elem.train)
 # grid=10^seq(10,-2, length =100)
 
 #lasso
-elem.glm <- glmnet(x[elem.train,],y[elem.train],family = "binomial",alpha=1) 
+elem.glm <- glmnet(elem.x[elem.train,],elem.y[elem.train],family = "binomial",alpha=1) 
 elem.glm
 #Plot the lasso
 plot(elem.glm)
 ```
 
+#Lasso for Middle School
+```{r}
+#removing all rows where API is null
+middle.reg2 = middle.reg
+
+middle.x <- model.matrix(API~.,middle.reg2)[,-1]
+middle.y <- as.matrix(data.frame(middle.reg$API))
+
+# Split data into test and train
+set.seed(1)
+middle.train <- sample(1:nrow(middle.x), nrow(middle.x)/2)
+middle.test <- (-middle.train)
+#y.test <- y[test]
+
+# If we want to specify the number of lambda values - not sure we actually need this
+# Predefined grid of lambda values: 
+# grid=10^seq(10,-2, length =100)
+
+#lasso
+middle.glm <- glmnet(middle.x[middle.train,],middle.y[middle.train],family = "binomial",alpha=1) 
+middle.glm
+#Plot the lasso
+plot(middle.glm)
+```
+
+#High School
+```{r}
+#removing all rows where API is null
+high.reg2 = high.reg
+
+high.x <- model.matrix(API~.,high.reg2)[,-1]
+high.y <- as.matrix(data.frame(high.reg$API))
+
+# Split data into test and train
+set.seed(1)
+high.train <- sample(1:nrow(high.x), nrow(high.x)/2)
+high.test <- (-high.train)
+#y.test <- y[test]
+
+# If we want to specify the number of lambda values - not sure we actually need this
+# Predefined grid of lambda values: 
+# grid=10^seq(10,-2, length =100)
+
+#lasso
+high.glm <- glmnet(high.x[high.train,],high.y[high.train],family = "binomial",alpha=1) 
+high.glm
+#Plot the lasso
+plot(high.glm)
+```
 #To do......
 #Convert year round to categorical-DONE LS
 #Round Education and turn to categorical (current null = 6)
