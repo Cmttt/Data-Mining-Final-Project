@@ -1,0 +1,210 @@
+---
+title: "DM_project"
+author: "Bai Xue"
+date: "12/8/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load Librarys
+```{r}
+library(ggplot2)
+library(plyr)
+library(ISLR)
+library(MASS)
+library(knitr)
+library(gam)
+library(readr)
+library(glmnet)
+library(rmarkdown)
+```
+
+## Read in data and read convert values to 0/1/NA
+```{r}
+#linear regression
+#elementary <- read_csv("Documents/Carnegie Mellon/Fall 2017/Data Mining/Data Mining Project/elementary.csv")
+#elementary <- read_csv("/Users/xb/Desktop/Data Mining project/elementary.csv")
+elementary <- read_csv("/Users/leonshi/Desktop/Data Mining/Final Project/elementary.csv")
+middle <- read_csv("/Users/leonshi/Desktop/Data Mining/Final Project/middle.csv")
+high <- read_csv("/Users/leonshi/Desktop/Data Mining/Final Project/high.csv")
+
+elementary.reg <- transform(elementary, 
+                  API = mapvalues(API, c("Low","High","?"), 
+                                     c(0, 1, NA)))
+```
+
+
+#Change ? to NA
+```{r}
+#Change ? to NA
+elementary.reg[elementary.reg == "?"] <- NA
+#middle.reg[middle.reg == "?"] <- NA
+
+#This removes rows where API has null values
+elementary.reg <- elementary.reg[-which(is.na(elementary.reg$API)), ]
+```
+
+
+## ACS_CORE
+## Change to numeric
+```{r}
+#Change to numeric 
+elementary.reg$ACS_CORE <- as.numeric(elementary.reg$ACS_CORE)
+```
+
+#Find the median
+```{r}
+#Find the median
+median.ASC<- median(elementary.reg$ACS_CORE, na.rm = TRUE)
+max.ASC <- max(elementary.reg$ACS_CORE,na.rm = TRUE)
+elementary.reg$ACS_CORE <- cut(elementary.reg$ACS_CORE, c(1, median.ASC + 1, max.ASC),labels = FALSE)
+elementary.reg$ACS_CORE[is.na(elementary.reg$ACS_CORE)] <- 3
+```
+
+#change ACS_CORE to categorical
+```{r}
+#change to categorical
+elementary.reg$ACS_CORE <- factor(elementary.reg$ACS_CORE)
+
+```
+
+# Change Charter and Year Round to categorical variable
+```{r}
+# Change Charter
+elementary.reg$CHARTER[is.na(elementary.reg$CHARTER)] <- 0
+elementary.reg$CHARTER[elementary.reg$CHARTER == "Y"] <- 1
+elementary.reg$CHARTER[elementary.reg$CHARTER == "D"] <- 2
+
+elementary.reg$YR_RND[is.na(elementary.reg$YR_RND)] <- 2
+elementary.reg$YR_RND[elementary.reg$YR_RND == "Yes"] <- 0
+elementary.reg$YR_RND[elementary.reg$YR_RND == "No"] <- 1
+
+#change to categorical
+elementary.reg$CHARTER <- factor(elementary.reg$CHARTER)
+elementary.reg$YR_RND <- factor(elementary.reg$YR_RND)
+#test
+is.factor(elementary.reg$CHARTER)
+is.factor(elementary.reg$YR_RND)
+
+```
+
+#Round and change average education to categorical variable
+```{r}
+#Change null values to 6
+elementary.reg$AVG_ED[is.na(elementary.reg$AVG_ED)] <- 6
+elementary.reg$AVG_ED <- as.numeric(elementary.reg$AVG_ED)
+elementary.reg$AVG_ED <- round(elementary.reg$AVG_ED, digits = 0)
+
+elementary.reg$AVG_ED <- as.factor(elementary.reg$AVG_ED)
+is.factor(elementary.reg$AVG_ED)
+```
+
+
+#Converting the Columns 
+```{r}
+#Converting the Columns 
+elementary.reg$API <- factor(elementary.reg$API)
+elementary.reg$VALID <- as.numeric(elementary.reg$VALID)
+elementary.reg$NUMTEACH <- as.numeric(elementary.reg$NUMTEACH)
+elementary.reg$FULL_PCT <- as.numeric(elementary.reg$FULL_PCT)
+elementary.reg$EMER_PCT <- as.numeric(elementary.reg$EMER_PCT)
+elementary.reg$WVR_PCT <- as.numeric(elementary.reg$WVR_PCT)
+elementary.reg$YRS_TEACH <- as.numeric(elementary.reg$YRS_TEACH)
+elementary.reg$YRONE_TCH <- as.numeric(elementary.reg$YRONE_TCH)
+elementary.reg$YRTWO_TCH <- as.numeric(elementary.reg$YRTWO_TCH)
+```
+
+#Logistic regression 
+
+```{r}
+#Logistic regression 
+elementary.log <- glm(API ~., family = binomial, data = elementary.reg) 
+elemLog.summary <- summary(elementary.log)
+kable(elemLog.summary$coefficients)
+```
+#Fitting a lasso on our model
+```{r}
+#removing all rows where API is null
+elementary.reg2 = elementary.reg
+#elementary.reg2$API <- NULL
+
+x <- model.matrix(API~.,elementary.reg2)[,-1]
+y <- as.matrix(data.frame(elementary.reg$API))
+#Need to change y to numeric to run cross validation
+y <- as.numeric(y)
+
+# Split data into test and train
+set.seed(1)
+elem.train <- sample(1:nrow(x), nrow(x)/2)
+elem.test <- (-elem.train)
+y.test <- y[test]
+
+# If we want to specify the number of lambda values - not sure we actually need this
+# Predefined grid of lambda values: 
+# grid=10^seq(10,-2, length =100)
+
+#Creating our lasso function
+elem.glm <- glmnet(x[elem.train,],y[elem.train],family = "binomial",alpha=1) 
+elem.glm
+#Plot the training lasso
+plot(elem.glm)
+
+#Fit the model on our test data
+set.seed(1)
+elem.out=cv.glmnet(x[elem.train,],y[elem.train],alpha=1)
+plot(elem.out)
+```
+
+#Determining coeffcients and significant predictors using lasso
+```{r}
+#Figuring out the minimum lambda value and predicting CV error on test
+elem.bestlam=elem.out$lambda.min
+elem.1se=elem.out$lambda.1se
+elem.lasso.pred=predict(elem.glm,s=elem.bestlam,newx=x[test,])
+print("Minimum lambda for Elementary")
+elem.bestlam
+print("1SE lambda for Elementary")
+elem.1se
+print("CV Error for Elementary")
+mean((elem.lasso.pred-y.test)^2)
+
+#Determine which variables are non-zero at the 1se value of lambda
+out=glmnet(x,y,alpha=1,family="binomial")
+elem.lasso.coef=predict(out,type="coefficients",s=elem.1se)
+elem.lasso.coef
+elem.lasso.coef[elem.lasso.coef!=0]
+```
+
+#Forward Selection
+
+```{r}
+
+```
+
+#To do......
+#Convert year round to categorical-DONE LS
+#Round Education and turn to categorical (current null = 6)
+#plot(elementary.log)
+#Check conditional probabilities with 
+#Classifiers
+#Logistic Lasso (Which ones are selected that are different than zero): Convert model to matrix model. Model.matrix. 
+#Forward Selection.
+#Clustering
+
+## Including Plots
+
+```{r}
+
+```
+
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
