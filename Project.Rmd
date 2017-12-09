@@ -201,7 +201,7 @@ elem.lasso.coef[elem.lasso.coef!=0]
 
 ## forward stepwise for elementary
 ```{r}
-forwardStepwise <- function(dataset){
+forwardStepwise <- function(dataset,title){
   if(is.data.frame(dataset)){
     forward <- regsubsets(API~.,
                                     data=dataset, 
@@ -218,18 +218,21 @@ forwardStepwise <- function(dataset){
     summary = summary(forward)
   
     # plot rsq on the y-axis
-    plot(elem.summary$rsq, xlab="model size", ylab="R-squared", type = "l")
+    plot(summary$rsq, xlab="model size", ylab="R-squared", type = "l",main = title)
     # plot showing BIC on the y-axis and
-    plot(summary$bic, xlab="Model Size", ylab="BIC",type = "l")
+    plot(summary$bic, xlab="Model Size", ylab="BIC",type = "l", main = title)
     return(summary)
   }
 }
+```
 
-elem.stepWise <- forwardStepwise(elementary.reg)
+```{r}
+
+elem.stepWise <- forwardStepwise(elementary.reg, "Elementary School")
 #print(which.min(elem.stepWise$bic))
 #coef(elementary.reg, which.min(elem.stepWise$bic))
-middle.stepWise <- forwardStepwise(middle.reg)
-high.stepWise <- forwardStepwise(high.reg)
+middle.stepWise <- forwardStepwise(middle.reg,"Middle School")
+high.stepWise <- forwardStepwise(high.reg, "High School")
 ```
 
 #Lasso for Middle School
