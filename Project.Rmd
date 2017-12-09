@@ -22,6 +22,8 @@ library(glmnet)
 library(rmarkdown)
 library(rpart)
 library(klaR) 
+library(leaps) 
+
 ```
 
 ## Read in data and read convert values to 0/1/NA
@@ -194,6 +196,40 @@ out=glmnet(elem.x,elem.y,alpha=1,family="binomial")
 elem.lasso.coef=predict(out,type="coefficients",s=elem.1se)
 elem.lasso.coef
 elem.lasso.coef[elem.lasso.coef!=0]
+```
+
+
+## forward stepwise for elementary
+```{r}
+forwardStepwise <- function(dataset){
+  if(is.data.frame(dataset)){
+    forward <- regsubsets(API~.,
+                                    data=dataset, 
+                                    nbest = 1, 
+                                    nvmax = NULL, 
+                                    method="forward", really.big=TRUE)
+    # display variables in each model for the fist 12 models
+    for(i in 1:12){
+      co = coef(forward, id=i)
+      print(i)
+      print(co)
+    }
+    
+    summary = summary(forward)
+  
+    # plot rsq on the y-axis
+    plot(elem.summary$rsq, xlab="model size", ylab="R-squared", type = "l")
+    # plot showing BIC on the y-axis and
+    plot(summary$bic, xlab="Model Size", ylab="BIC",type = "l")
+    return(summary)
+  }
+}
+
+elem.stepWise <- forwardStepwise(elementary.reg)
+#print(which.min(elem.stepWise$bic))
+#coef(elementary.reg, which.min(elem.stepWise$bic))
+middle.stepWise <- forwardStepwise(middle.reg)
+high.stepWise <- forwardStepwise(high.reg)
 ```
 
 #Lasso for Middle School
