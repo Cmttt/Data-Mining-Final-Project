@@ -133,7 +133,6 @@ kable(elemLog.summary$coefficients)
 
 ggplot(elementary.reg, aes(elementary.log$fitted.values, fill = as.factor(elementary.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
 
-
 ```
 
 #Logistic Regression - Middle School
@@ -352,19 +351,16 @@ mean(elem.nb.pred$class != elementary.reg$API)
 #Tree 
 ```{r}
 treeFun <- function(dataset){
+
   set.seed(1)
   train <- sample(1:nrow(dataset), nrow(dataset)/2)
   
   new <- as.data.frame(dataset[train,])
   tree <- rpart(API~.,data = new, method = "class")
   
-  #plot(tree)
-  #text(tree,pretty = 0)
-  #print(tree)
   tree.party <- as.party(tree)
-  plot(tree.party)
+  plot(tree.party, gp = gpar(fontsize = 7))
   print(tree.party)
-
 }
 ```
 
