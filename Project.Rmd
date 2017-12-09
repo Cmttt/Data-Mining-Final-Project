@@ -25,7 +25,7 @@ library(klaR)
 library(leaps) 
 library(partykit)
 library(rpart.plot)
-
+install.packages()
 ```
 
 ## Read in data and read convert values to 0/1/NA
@@ -378,11 +378,8 @@ high.test <- high.reg[test3,]
 ```
 #Tree 
 ```{r}
-
-  
 treeFun <- function(dataset){
-  tree <- rpart(API~.,data = new, method = "class")
-  
+  tree <- rpart(API~.,data = dataset, method = "class")
   tree.party <- as.party(tree)
   plot(tree.party, gp = gpar(fontsize = 7))
   print(tree.party)
@@ -393,7 +390,6 @@ treeFun <- function(dataset){
 treeFun(elementary.train)
 treeFun(middle.train)
 treeFun(high.train)
-
 ```
 
 
