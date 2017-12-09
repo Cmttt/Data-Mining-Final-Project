@@ -24,7 +24,7 @@ library(rpart)
 library(klaR) 
 library(leaps) 
 library(partykit)
-
+library(rpart.plot)
 
 ```
 
@@ -348,14 +348,39 @@ print("Misclassification Rate")
 mean(elem.nb.pred$class != elementary.reg$API)
 
 ```
+
+#Create Test and Train Data
+```{r}
+#Elementary
+set.seed(1)
+train1 <- sample(1:nrow(elementary.reg), nrow(elementary.reg)/2)
+elementary.train <- as.data.frame(elementary.reg[train1,])
+
+test1 <- (-train1)
+elementary.test <- elementary.reg[test1,]
+
+#Middle
+set.seed(1)
+train2 <- sample(1:nrow(middle.reg), nrow(middle.reg)/2)
+middle.train <- as.data.frame(middle.reg[train2,])
+
+test2 <- (-train2)
+middle.test <- elementary.reg[test2,]
+
+#High School
+set.seed(1)
+train3 <- sample(1:nrow(high.reg), nrow(high.reg)/2)
+high.train <- as.data.frame(high.reg[train3,])
+
+test3 <- (-train3)
+high.test <- high.reg[test3,]
+
+```
 #Tree 
 ```{r}
-treeFun <- function(dataset){
 
-  set.seed(1)
-  train <- sample(1:nrow(dataset), nrow(dataset)/2)
   
-  new <- as.data.frame(dataset[train,])
+treeFun <- function(dataset){
   tree <- rpart(API~.,data = new, method = "class")
   
   tree.party <- as.party(tree)
@@ -365,9 +390,9 @@ treeFun <- function(dataset){
 ```
 
 ```{r}
-treeFun(elementary.reg)
-treeFun(middle.reg)
-treeFun(high.reg)
+treeFun(elementary.train)
+treeFun(middle.train)
+treeFun(high.train)
 
 ```
 
