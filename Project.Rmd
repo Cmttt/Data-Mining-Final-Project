@@ -1,6 +1,6 @@
 ---
-title: "DM_project"
-author: "Bai Xue"
+title: "Data Mining Project"
+author: "Nadine Fares, Leyang Shi, Bai Xue"
 date: "12/8/2017"
 output: html_document
 ---
@@ -25,7 +25,6 @@ library(klaR)
 library(leaps) 
 library(partykit)
 library(rpart.plot)
-install.packages()
 ```
 
 ## Read in data and read convert values to 0/1/NA
@@ -149,6 +148,39 @@ kable(summary(high.log)$coefficients)
 ggplot(high.reg, aes(high.log$fitted.values, fill = as.factor(high.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
 ```
 
+## forward stepwise for elementary
+```{r}
+forwardStepwise <- function(dataset,title){
+  if(is.data.frame(dataset)){
+    forward <- regsubsets(API~.,
+                                    data=dataset, 
+                                    nbest = 1, 
+                                    nvmax = NULL, 
+                                    method="forward", really.big=TRUE)
+    # display variables in each model for the fist 12 models
+    for(i in 1:12){
+      co = coef(forward, id=i)
+      print(i)
+      print(co)
+    }
+    
+    summary = summary(forward)
+  
+    # plot rsq on the y-axis
+    plot(summary$rsq, xlab="model size", ylab="R-squared", type = "l",main = paste(title,"R-Squared", sep="\n"))
+    # plot showing BIC on the y-axis and
+    plot(summary$bic, xlab="Model Size", ylab="BIC",type = "l", main = paste(title,"BIC",sep="\n"))
+    return(summary)
+  }
+}
+```
+
+```{r}
+
+elem.stepWise <- forwardStepwise(elementary.reg, "Elementary School")
+middle.stepWise <- forwardStepwise(middle.reg,"Middle School")
+high.stepWise <- forwardStepwise(high.reg, "High School")
+```
 #lasso for Elementary
 ```{r}
 #removing all rows where API is null
@@ -204,39 +236,6 @@ elem.lasso.coef[elem.lasso.coef!=0]
 ```
 
 
-## forward stepwise for elementary
-```{r}
-forwardStepwise <- function(dataset,title){
-  if(is.data.frame(dataset)){
-    forward <- regsubsets(API~.,
-                                    data=dataset, 
-                                    nbest = 1, 
-                                    nvmax = NULL, 
-                                    method="forward", really.big=TRUE)
-    # display variables in each model for the fist 12 models
-    for(i in 1:12){
-      co = coef(forward, id=i)
-      print(i)
-      print(co)
-    }
-    
-    summary = summary(forward)
-  
-    # plot rsq on the y-axis
-    plot(summary$rsq, xlab="model size", ylab="R-squared", type = "l",main = paste(title,"R-Squared", sep="\n"))
-    # plot showing BIC on the y-axis and
-    plot(summary$bic, xlab="Model Size", ylab="BIC",type = "l", main = paste(title,"BIC",sep="\n"))
-    return(summary)
-  }
-}
-```
-
-```{r}
-
-elem.stepWise <- forwardStepwise(elementary.reg, "Elementary School")
-middle.stepWise <- forwardStepwise(middle.reg,"Middle School")
-high.stepWise <- forwardStepwise(high.reg, "High School")
-```
 
 #Lasso for Middle School
 ```{r}
@@ -385,10 +384,16 @@ treeFun <- function(dataset){
   print(tree.party)
 }
 ```
-
+#Elementary Tree
 ```{r}
 treeFun(elementary.train)
+```
+#middle
+```{r}
 treeFun(middle.train)
+```
+#high
+```{r}
 treeFun(high.train)
 ```
 
