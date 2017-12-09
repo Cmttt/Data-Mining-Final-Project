@@ -23,6 +23,8 @@ library(rmarkdown)
 library(rpart)
 library(klaR) 
 library(leaps) 
+library(partykit)
+
 
 ```
 
@@ -130,18 +132,22 @@ elemLog.summary <- summary(elementary.log)
 kable(elemLog.summary$coefficients)
 
 ggplot(elementary.reg, aes(elementary.log$fitted.values, fill = as.factor(elementary.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
+
+
 ```
 
 #Logistic Regression - Middle School
 ```{r}
 middle.log <- glm(API ~., family = binomial, data = middle.reg) 
 kable(summary(middle.log)$coefficients )
+ggplot(middle.reg, aes(middle.log$fitted.values, fill = as.factor(middle.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
 ```
 
 
 ```{r}
 high.log <- glm(API ~., family = binomial, data = high.reg) 
 kable(summary(high.log)$coefficients)
+ggplot(high.reg, aes(high.log$fitted.values, fill = as.factor(high.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
 ```
 
 #lasso for Elementary
@@ -229,8 +235,6 @@ forwardStepwise <- function(dataset,title){
 ```{r}
 
 elem.stepWise <- forwardStepwise(elementary.reg, "Elementary School")
-#print(which.min(elem.stepWise$bic))
-#coef(elementary.reg, which.min(elem.stepWise$bic))
 middle.stepWise <- forwardStepwise(middle.reg,"Middle School")
 high.stepWise <- forwardStepwise(high.reg, "High School")
 ```
@@ -347,21 +351,30 @@ mean(elem.nb.pred$class != elementary.reg$API)
 ```
 #Tree 
 ```{r}
+treeFun <- function(dataset){
+  set.seed(1)
+  train <- sample(1:nrow(dataset), nrow(dataset)/2)
+  
+  new <- as.data.frame(dataset[train,])
+  tree <- rpart(API~.,data = new, method = "class")
+  
+  #plot(tree)
+  #text(tree,pretty = 0)
+  #print(tree)
+  tree.party <- as.party(tree)
+  plot(tree.party)
+  print(tree.party)
 
-#full <- data.frame(elem.x,elem.y)
-set.seed(1)
-new.elem.train <- sample(1:nrow(elementary.reg), nrow(elementary.reg)/2)
+}
+```
 
-#elem.glm <- glmnet(elem.x[elem.train,],elem.y[elem.train],family = "binomial",alpha=1) 
-#elem.glm
+```{r}
+treeFun(elementary.reg)
+treeFun(middle.reg)
+treeFun(high.reg)
 
-new <- as.data.frame(elementary.reg[new.elem.train,])
-elementary.tree <- rpart(API~., data = new, method = "class")
+```
 
-#plot
-plot(elementary.tree)
-text(elementary.tree, pretty = 0)
-print(elementary.tree)
 
 ```
 
