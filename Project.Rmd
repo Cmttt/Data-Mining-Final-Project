@@ -149,9 +149,11 @@ elem.y <- as.matrix(data.frame(elementary.reg$API))
 #Need to change y to numeric to run cross validation
 elem.y <- as.numeric(elem.y)
 
+full <- data.frame(elem.x,elem.y)
 # Split data into test and train
 set.seed(1)
 elem.train <- sample(1:nrow(elem.x), nrow(elem.x)/2)
+e<-as.data.frame(elem.train)
 elem.test <- (-elem.train)
 elem.y.test <- elem.y[elem.test]
 
@@ -301,6 +303,25 @@ print("Misclassification Rate")
 mean(elem.nb.pred$class != elementary.reg$API)
 
 ```
+#Tree 
+```{r}
+
+#full <- data.frame(elem.x,elem.y)
+set.seed(1)
+new.elem.train <- sample(1:nrow(elementary.reg), nrow(elementary.reg)/2)
+
+#elem.glm <- glmnet(elem.x[elem.train,],elem.y[elem.train],family = "binomial",alpha=1) 
+#elem.glm
+
+new <- as.data.frame(elementary.reg[new.elem.train,])
+elementary.tree <- rpart(API~., data = new, method = "class")
+
+#plot
+plot(elementary.tree)
+text(elementary.tree, pretty = 0)
+print(elementary.tree)
+
+```
 
 #To do......
 #Convert year round to categorical-DONE LS
@@ -312,18 +333,4 @@ mean(elem.nb.pred$class != elementary.reg$API)
 #Forward Selection.
 #Clustering
 
-## Including Plots
 
-```{r}
-
-```
-
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
