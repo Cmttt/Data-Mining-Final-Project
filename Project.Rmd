@@ -182,7 +182,7 @@ elem.bestlam
 print("1SE lambda for Elementary")
 elem.1se
 print("CV Error for Elementary")
-mean((elem.lasso.pred-y.test)^2)
+mean((elem.lasso.pred-elem.y.test)^2)
 
 #Determine which variables are non-zero at the 1se value of lambda
 out=glmnet(x,y,alpha=1,family="binomial")
