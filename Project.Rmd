@@ -20,6 +20,8 @@ library(gam)
 library(readr)
 library(glmnet)
 library(rmarkdown)
+library(rpart)
+library(klaR) 
 ```
 
 ## Read in data and read convert values to 0/1/NA
@@ -125,6 +127,7 @@ elementary.log <- glm(API ~., family = binomial, data = elementary.reg)
 elemLog.summary <- summary(elementary.log)
 kable(elemLog.summary$coefficients)
 
+ggplot(elementary.reg, aes(elementary.log$fitted.values, fill = as.factor(elementary.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
 ```
 
 #Logistic Regression - Middle School
