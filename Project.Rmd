@@ -146,12 +146,14 @@ elementary.reg2 = elementary.reg
 
 elem.x <- model.matrix(API~.,elementary.reg2)[,-1]
 elem.y <- as.matrix(data.frame(elementary.reg$API))
+#Need to change y to numeric to run cross validation
+y <- as.numeric(y)
 
 # Split data into test and train
 set.seed(1)
 elem.train <- sample(1:nrow(elem.x), nrow(elem.x)/2)
 elem.test <- (-elem.train)
-#y.test <- y[test]
+y.test <- y[test]
 
 # If we want to specify the number of lambda values - not sure we actually need this
 # Predefined grid of lambda values: 
@@ -160,12 +162,15 @@ elem.test <- (-elem.train)
 #lasso
 elem.glm <- glmnet(elem.x[elem.train,],elem.y[elem.train],family = "binomial",alpha=1) 
 elem.glm
+
+set.seed(1)
+elem.out=cv.glmnet(x[elem.train,],y[elem.train],alpha=1)
+plot(elem.out)
 #Plot the lasso
 plot(elem.glm)
 ```
 
-
-#Determining coeffcients and significant predictors using lasso
+#Determining coeffcients and significant predictors using lasso - Elementary
 ```{r}
 #Figuring out the minimum lambda value and predicting CV error on test
 elem.bestlam=elem.out$lambda.min
@@ -184,8 +189,6 @@ elem.lasso.coef=predict(out,type="coefficients",s=elem.1se)
 elem.lasso.coef
 elem.lasso.coef[elem.lasso.coef!=0]
 ```
-
-
 
 #Lasso for Middle School
 ```{r}
@@ -211,6 +214,27 @@ middle.glm
 #Plot the lasso
 plot(middle.glm)
 ```
+
+```{r}
+#Figuring out the minimum lambda value and predicting CV error on test
+elem.bestlam=elem.out$lambda.min
+elem.1se=elem.out$lambda.1se
+elem.lasso.pred=predict(elem.glm,s=elem.bestlam,newx=x[test,])
+print("Minimum lambda for Elementary")
+elem.bestlam
+print("1SE lambda for Elementary")
+elem.1se
+print("CV Error for Elementary")
+mean((elem.lasso.pred-y.test)^2)
+
+#Determine which variables are non-zero at the 1se value of lambda
+out=glmnet(x,y,alpha=1,family="binomial")
+elem.lasso.coef=predict(out,type="coefficients",s=elem.1se)
+elem.lasso.coef
+elem.lasso.coef[elem.lasso.coef!=0]
+```
+
+
 
 #High School
 ```{r}
