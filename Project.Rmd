@@ -147,7 +147,7 @@ elementary.reg2 = elementary.reg
 elem.x <- model.matrix(API~.,elementary.reg2)[,-1]
 elem.y <- as.matrix(data.frame(elementary.reg$API))
 #Need to change y to numeric to run cross validation
-elem.y <- as.numeric(y)
+elem.y <- as.numeric(elem.y)
 
 # Split data into test and train
 set.seed(1)
@@ -167,12 +167,12 @@ plot(elem.glm)
 
 #Fit the model on our test data
 set.seed(1)
-elem.out=cv.glmnet(x[elem.train,],y[elem.train],alpha=1)
+elem.out=cv.glmnet(elem.x[elem.train,],elem.y[elem.train],alpha=1)
 plot(elem.out)
 ```
 
 #Determining coeffcients and significant predictors using lasso - Elementary
-```{r}
+```{r,warning=FALSE}
 #Figuring out the minimum lambda value and predicting CV error on test
 elem.bestlam=elem.out$lambda.min
 elem.1se=elem.out$lambda.1se
@@ -185,7 +185,7 @@ print("CV Error for Elementary")
 mean((elem.lasso.pred-elem.y.test)^2)
 
 #Determine which variables are non-zero at the 1se value of lambda
-out=glmnet(x,y,alpha=1,family="binomial")
+out=glmnet(elem.x,elem.y,alpha=1,family="binomial")
 elem.lasso.coef=predict(out,type="coefficients",s=elem.1se)
 elem.lasso.coef
 elem.lasso.coef[elem.lasso.coef!=0]
@@ -217,12 +217,12 @@ middle.glm
 plot(middle.glm)
 
 set.seed(1)
-middle.out=cv.glmnet(x[middle.train,],y[middle.train],alpha=1)
+middle.out=cv.glmnet(middle.x[middle.train,],middle.y[middle.train],alpha=1)
 plot(middle.out)
 ```
 
 #Determining coeffcients and significant predictors using lasso - Middle
-```{r}
+```{r,warning= FALSE}
 #Figuring out the minimum lambda value and predicting CV error on test
 middle.bestlam=middle.out$lambda.min
 middle.1se=middle.out$lambda.1se
@@ -235,7 +235,7 @@ print("CV Error for Middle")
 mean((middle.lasso.pred-middle.y.test)^2)
 
 #Determine which variables are non-zero at the 1se value of lambda
-out=glmnet(x,y,alpha=1,family="binomial")
+out=glmnet(middle.x,middle.y,alpha=1,family="binomial")
 middle.lasso.coef=predict(out,type="coefficients",s=middle.1se)
 middle.lasso.coef
 middle.lasso.coef[middle.lasso.coef!=0]
@@ -268,7 +268,7 @@ high.glm
 plot(high.glm)
 
 set.seed(1)
-high.out=cv.glmnet(x[high.train,],y[high.train],alpha=1)
+high.out=cv.glmnet(high.x[high.train,],high.y[high.train],alpha=1)
 plot(high.out)
 ```
 
@@ -285,10 +285,21 @@ print("CV Error for High")
 mean((high.lasso.pred-high.y.test)^2)
 
 #Determine which variables are non-zero at the 1se value of lambda
-out=glmnet(x,y,alpha=1,family="binomial")
+out=glmnet(high.x,high.y,alpha=1,family="binomial")
 high.lasso.coef=predict(out,type="coefficients",s=high.1se)
 high.lasso.coef
 high.lasso.coef[high.lasso.coef!=0]
+```
+
+#Classification with Naive Bayes
+```{r, warning=FALSE}
+elem.nb = NaiveBayes(elementary.reg$API ~ ., data = elementary.reg, usekernal = TRUE)
+elem.nb.pred = predict(elem.nb,elementary.reg)
+table(elem.nb.pred$class, elementary.reg$API)
+cat("\n")
+print("Misclassification Rate")
+mean(elem.nb.pred$class != elementary.reg$API)
+
 ```
 
 #To do......
