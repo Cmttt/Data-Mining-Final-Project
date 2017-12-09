@@ -176,7 +176,7 @@ plot(elem.out)
 #Figuring out the minimum lambda value and predicting CV error on test
 elem.bestlam=elem.out$lambda.min
 elem.1se=elem.out$lambda.1se
-elem.lasso.pred=predict(elem.glm,s=elem.bestlam,newx=x[test,])
+elem.lasso.pred=predict(elem.glm,s=elem.bestlam,newx=elem.x[elem.test,])
 print("Minimum lambda for Elementary")
 elem.bestlam
 print("1SE lambda for Elementary")
@@ -198,6 +198,7 @@ middle.reg2 = middle.reg
 
 middle.x <- model.matrix(API~.,middle.reg2)[,-1]
 middle.y <- as.matrix(data.frame(middle.reg$API))
+middle.y <- as.numeric(middle.y)
 
 # Split data into test and train
 set.seed(1)
@@ -220,23 +221,24 @@ middle.out=cv.glmnet(x[middle.train,],y[middle.train],alpha=1)
 plot(middle.out)
 ```
 
+#Determining coeffcients and significant predictors using lasso - Middle
 ```{r}
 #Figuring out the minimum lambda value and predicting CV error on test
-elem.bestlam=elem.out$lambda.min
-elem.1se=elem.out$lambda.1se
-elem.lasso.pred=predict(elem.glm,s=elem.bestlam,newx=x[test,])
-print("Minimum lambda for Elementary")
-elem.bestlam
-print("1SE lambda for Elementary")
-elem.1se
-print("CV Error for Elementary")
-mean((elem.lasso.pred-y.test)^2)
+middle.bestlam=middle.out$lambda.min
+middle.1se=middle.out$lambda.1se
+middle.lasso.pred=predict(middle.glm,s=middle.bestlam,newx=middle.x[middle.test,])
+print("Minimum lambda for Middle")
+middle.bestlam
+print("1SE lambda for Middle")
+middle.1se
+print("CV Error for Middle")
+mean((middle.lasso.pred-middle.y.test)^2)
 
 #Determine which variables are non-zero at the 1se value of lambda
 out=glmnet(x,y,alpha=1,family="binomial")
-elem.lasso.coef=predict(out,type="coefficients",s=elem.1se)
-elem.lasso.coef
-elem.lasso.coef[elem.lasso.coef!=0]
+middle.lasso.coef=predict(out,type="coefficients",s=middle.1se)
+middle.lasso.coef
+middle.lasso.coef[middle.lasso.coef!=0]
 ```
 
 
@@ -247,6 +249,7 @@ high.reg2 = high.reg
 
 high.x <- model.matrix(API~.,high.reg2)[,-1]
 high.y <- as.matrix(data.frame(high.reg$API))
+high.y <- as.numeric(high.y)
 
 # Split data into test and train
 set.seed(1)
@@ -268,6 +271,26 @@ set.seed(1)
 high.out=cv.glmnet(x[high.train,],y[high.train],alpha=1)
 plot(high.out)
 ```
+
+```{r}
+#Figuring out the minimum lambda value and predicting CV error on test
+high.bestlam=high.out$lambda.min
+high.1se=high.out$lambda.1se
+high.lasso.pred=predict(high.glm,s=high.bestlam,newx=high.x[high.test,])
+print("Minimum lambda for High")
+high.bestlam
+print("1SE lambda for High")
+high.1se
+print("CV Error for High")
+mean((high.lasso.pred-high.y.test)^2)
+
+#Determine which variables are non-zero at the 1se value of lambda
+out=glmnet(x,y,alpha=1,family="binomial")
+high.lasso.coef=predict(out,type="coefficients",s=high.1se)
+high.lasso.coef
+high.lasso.coef[high.lasso.coef!=0]
+```
+
 #To do......
 #Convert year round to categorical-DONE LS
 #Round Education and turn to categorical (current null = 6)
