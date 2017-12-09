@@ -218,9 +218,9 @@ forwardStepwise <- function(dataset,title){
     summary = summary(forward)
   
     # plot rsq on the y-axis
-    plot(summary$rsq, xlab="model size", ylab="R-squared", type = "l",main = title)
+    plot(summary$rsq, xlab="model size", ylab="R-squared", type = "l",main = paste(title,"R-Squared", sep="\n"))
     # plot showing BIC on the y-axis and
-    plot(summary$bic, xlab="Model Size", ylab="BIC",type = "l", main = title)
+    plot(summary$bic, xlab="Model Size", ylab="BIC",type = "l", main = paste(title,"BIC",sep="\n"))
     return(summary)
   }
 }
