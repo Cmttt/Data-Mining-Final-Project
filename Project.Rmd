@@ -2,7 +2,12 @@
 title: "Data Mining Project"
 author: "Nadine Fares, Leyang Shi, Bai Xue"
 date: "12/8/2017"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_depth: 4
+    theme: lumen
+    highlight: tango
 ---
 
 ```{r setup, include=FALSE}
@@ -10,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Load Librarys
-```{r}
+```{r, message = FALSE}
 library(ggplot2)
 library(plyr)
 library(ISLR)
@@ -30,6 +35,7 @@ library(dplyr)
 ```
 
 #What are the Key Determinents of School Success?
+
 ## Methods
 ###Cleaning and transforming the Data
 ##### Read in data and read convert values to 0/1/NA
@@ -406,7 +412,7 @@ mean(high.nb.pred$class != high.reg$API)
 
 ```
 
-#### Decisions Trees 
+#### Decisions Trees
 ```{r}
 treeFun <- function(dataset){
   tree <- rpart(API~.,data = dataset, method = "class")
@@ -428,7 +434,7 @@ treeFun(middleschool.train)
 treeFun(highschool.train)
 ```
 
-####Random Forest
+#### Random Forest
 #####Elementary School
 ```{r}
 elementary.train=elementary.train %>% mutate_if(is.character, as.factor)
@@ -457,15 +463,4 @@ print(high.rf)
 importance(high.rf)
 varImpPlot(high.rf)
 ```
-
-#To do......
-#Convert year round to categorical-DONE LS
-#Round Education and turn to categorical (current null = 6)
-#plot(elementary.log)
-#Check conditional probabilities with 
-#Classifiers
-#Logistic Lasso (Which ones are selected that are different than zero): Convert model to matrix model. Model.matrix. 
-#Forward Selection.
-#Clustering
-
 
