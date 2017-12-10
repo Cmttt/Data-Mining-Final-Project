@@ -24,7 +24,9 @@ library(rpart)
 library(klaR) 
 library(leaps) 
 library(partykit)
-library(rpart.plot)
+library(randomForest)
+library(dplyr)
+
 ```
 
 ## Read in data and read convert values to 0/1/NA
@@ -397,7 +399,33 @@ treeFun(middle.train)
 treeFun(high.train)
 ```
 
+#Random Forest - Elementary School
+```{r}
+elementary.train=elementary.train %>% mutate_if(is.character, as.factor)
+elementary.rf <- randomForest(API~., data = elementary.train, mtry=6, importance=TRUE)
+print(elementary.rf)
+importance(elementary.rf)
+varImpPlot(elementary.rf)
 
+```
+
+
+#Random Forest - Middle School
+```{r}
+middle.train=middle.train %>% mutate_if(is.character, as.factor)
+middle.rf <- randomForest(API~., data = middle.train, mtry=6, importance=TRUE)
+print(middle.rf)
+importance(middle.rf)
+varImpPlot(middle.rf)
+```
+
+#Random Forest - High School
+```{r}
+high.train=high.train %>% mutate_if(is.character, as.factor)
+high.rf <- randomForest(API~., data = high.train, mtry=6, importance=TRUE)
+print(high.rf)
+importance(high.rf)
+varImpPlot(high.rf)
 ```
 
 #To do......
