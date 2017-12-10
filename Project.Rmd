@@ -188,6 +188,7 @@ high.log <- glm(API ~., family = binomial, data = high.reg)
 kable(summary(high.log)$coefficients)
 ggplot(high.reg, aes(high.log$fitted.values, fill = as.factor(high.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
 ```
+
 #### Forward Stepwise
 ##### Function
 ```{r}
@@ -215,13 +216,13 @@ forwardStepwise <- function(dataset,title){
   }
 }
 ```
-#####Results for Elementary, Middle, and High School
+##### Results for Elementary, Middle, and High School
 ```{r}
-
 elem.stepWise <- forwardStepwise(elementary.reg, "Elementary School")
 middle.stepWise <- forwardStepwise(middle.reg,"Middle School")
 high.stepWise <- forwardStepwise(high.reg, "High School")
 ```
+
 #### Lasso
 #####Elementary
 ```{r}
