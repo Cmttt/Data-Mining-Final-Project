@@ -29,7 +29,10 @@ library(dplyr)
 
 ```
 
-## Read in data and read convert values to 0/1/NA
+#What are the Key Determinents of School Success?
+## Methods
+###Cleaning and transforming the Data
+##### Read in data and read convert values to 0/1/NA
 ```{r, warning=FALSE, message = FALSE}
 #linear regression
 elementary <- read_csv("elementary.csv")
@@ -39,7 +42,7 @@ middle <- read_csv("middle.csv")
 high <- read_csv("high.csv")
 ```
 
-#Create Transformation Functions
+#####Create Transformation Functions
 ```{r}
 #to transform and clean API
 APITransform <- function(dataset){
@@ -111,7 +114,7 @@ APITransform <- function(dataset){
 
 ```
 
-#Transform Data
+#####Transform Data
 ```{r}
 elementary.reg = APITransform(elementary)
 elementary.reg = ChangeCategorical(elementary.reg)
@@ -123,9 +126,39 @@ middle.reg = APITransform(middle)
 middle.reg = ChangeCategorical(middle.reg)
 ```
 
+#####Test and Training Data
+```{r}
+#Elementary
+set.seed(1)
+train1 <- sample(1:nrow(elementary.reg), nrow(elementary.reg)/2)
+elementary.train <- as.data.frame(elementary.reg[train1,])
 
-#Logistic regression-Elementary School 
+test1 <- (-train1)
+elementary.test <- elementary.reg[test1,]
 
+#Middle
+set.seed(1)
+train2 <- sample(1:nrow(middle.reg), nrow(middle.reg)/2)
+middleschool.train <- as.data.frame(middle.reg[train2,])
+
+test2 <- (-train2)
+middleschool.test <- elementary.reg[test2,]
+
+#High School
+set.seed(1)
+train3 <- sample(1:nrow(high.reg), nrow(high.reg)/2)
+highschool.train <- as.data.frame(high.reg[train3,])
+
+test3 <- (-train3)
+highschool.test <- high.reg[test3,]
+
+```
+
+### Models
+
+####Logistic regressions
+
+##### Elementary School
 ```{r}
 #Logistic regression 
 elementary.log <- glm(API ~., family = binomial, data = elementary.reg) 
@@ -136,21 +169,21 @@ ggplot(elementary.reg, aes(elementary.log$fitted.values, fill = as.factor(elemen
 
 ```
 
-#Logistic Regression - Middle School
+##### Middle School
 ```{r}
 middle.log <- glm(API ~., family = binomial, data = middle.reg) 
 kable(summary(middle.log)$coefficients )
 ggplot(middle.reg, aes(middle.log$fitted.values, fill = as.factor(middle.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
 ```
 
-
+##### High School
 ```{r}
 high.log <- glm(API ~., family = binomial, data = high.reg) 
 kable(summary(high.log)$coefficients)
 ggplot(high.reg, aes(high.log$fitted.values, fill = as.factor(high.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
 ```
-
-## forward stepwise for elementary
+#### Forward Stepwise
+##### Function
 ```{r}
 forwardStepwise <- function(dataset,title){
   if(is.data.frame(dataset)){
@@ -176,14 +209,15 @@ forwardStepwise <- function(dataset,title){
   }
 }
 ```
-
+#####Results for Elementary, Middle, and High School
 ```{r}
 
 elem.stepWise <- forwardStepwise(elementary.reg, "Elementary School")
 middle.stepWise <- forwardStepwise(middle.reg,"Middle School")
 high.stepWise <- forwardStepwise(high.reg, "High School")
 ```
-#lasso for Elementary
+#### Lasso
+#####Elementary
 ```{r}
 #removing all rows where API is null
 elementary.reg2 = elementary.reg
@@ -217,7 +251,7 @@ elem.out=cv.glmnet(elem.x[elem.train,],elem.y[elem.train],alpha=1)
 plot(elem.out)
 ```
 
-#Determining coeffcients and significant predictors using lasso - Elementary
+######Determining coeffcients and significant predictors using lasso - Elementary
 ```{r,warning=FALSE}
 #Figuring out the minimum lambda value and predicting CV error on test
 elem.bestlam=elem.out$lambda.min
@@ -239,7 +273,7 @@ elem.lasso.coef[elem.lasso.coef!=0]
 
 
 
-#Lasso for Middle School
+#####Middle School
 ```{r}
 #removing all rows where API is null
 middle.reg2 = middle.reg
@@ -269,7 +303,7 @@ middle.out=cv.glmnet(middle.x[middle.train,],middle.y[middle.train],alpha=1)
 plot(middle.out)
 ```
 
-#Determining coeffcients and significant predictors using lasso - Middle
+######Determining coeffcients and significant predictors using lasso - Middle
 ```{r,warning= FALSE}
 #Figuring out the minimum lambda value and predicting CV error on test
 middle.bestlam=middle.out$lambda.min
@@ -290,7 +324,7 @@ middle.lasso.coef[middle.lasso.coef!=0]
 ```
 
 
-#High School
+#####High School
 ```{r}
 #removing all rows where API is null
 high.reg2 = high.reg
@@ -319,7 +353,7 @@ set.seed(1)
 high.out=cv.glmnet(high.x[high.train,],high.y[high.train],alpha=1)
 plot(high.out)
 ```
-
+######Determining coeffcients and significant predictors using lasso - High
 ```{r}
 #Figuring out the minimum lambda value and predicting CV error on test
 high.bestlam=high.out$lambda.min
@@ -339,7 +373,9 @@ high.lasso.coef
 high.lasso.coef[high.lasso.coef!=0]
 ```
 
-#Classification with Naive Bayes
+####Classification with Naive Bayes
+
+#####Elementary School
 ```{r, warning=FALSE}
 elem.nb = NaiveBayes(elementary.reg$API ~ ., data = elementary.reg, usekernal = TRUE)
 elem.nb.pred = predict(elem.nb,elementary.reg)
@@ -349,35 +385,28 @@ print("Misclassification Rate")
 mean(elem.nb.pred$class != elementary.reg$API)
 
 ```
-
-#Create Test and Train Data
-```{r}
-#Elementary
-set.seed(1)
-train1 <- sample(1:nrow(elementary.reg), nrow(elementary.reg)/2)
-elementary.train <- as.data.frame(elementary.reg[train1,])
-
-test1 <- (-train1)
-elementary.test <- elementary.reg[test1,]
-
-#Middle
-set.seed(1)
-train2 <- sample(1:nrow(middle.reg), nrow(middle.reg)/2)
-middle.train <- as.data.frame(middle.reg[train2,])
-
-test2 <- (-train2)
-middle.test <- elementary.reg[test2,]
-
-#High School
-set.seed(1)
-train3 <- sample(1:nrow(high.reg), nrow(high.reg)/2)
-high.train <- as.data.frame(high.reg[train3,])
-
-test3 <- (-train3)
-high.test <- high.reg[test3,]
+##### Middle School
+```{r, warning=FALSE}
+middle.nb = NaiveBayes(middle.reg$API ~ ., data = middle.reg, usekernal = TRUE)
+middle.nb.pred = predict(middle.nb,middle.reg)
+table(middle.nb.pred$class, middle.reg$API)
+cat("\n")
+print("Misclassification Rate")
+mean(middle.nb.pred$class != middle.reg$API)
 
 ```
-#Tree 
+##### High School
+```{r, warning=FALSE}
+high.nb = NaiveBayes(high.reg$API ~ ., data = high.reg, usekernal = TRUE)
+high.nb.pred = predict(high.nb,high.reg)
+table(high.nb.pred$class, high.reg$API)
+cat("\n")
+print("Misclassification Rate")
+mean(high.nb.pred$class != high.reg$API)
+
+```
+
+#### Decisions Trees 
 ```{r}
 treeFun <- function(dataset){
   tree <- rpart(API~.,data = dataset, method = "class")
@@ -386,20 +415,21 @@ treeFun <- function(dataset){
   print(tree.party)
 }
 ```
-#Elementary Tree
+##### Elementary School Tree
 ```{r}
 treeFun(elementary.train)
 ```
-#middle
+##### Middle School Tree
 ```{r}
-treeFun(middle.train)
+treeFun(middleschool.train)
 ```
-#high
+##### High School Tree
 ```{r}
-treeFun(high.train)
+treeFun(highschool.train)
 ```
 
-#Random Forest - Elementary School
+####Random Forest
+#####Elementary School
 ```{r}
 elementary.train=elementary.train %>% mutate_if(is.character, as.factor)
 elementary.rf <- randomForest(API~., data = elementary.train, mtry=6, importance=TRUE)
@@ -410,19 +440,19 @@ varImpPlot(elementary.rf)
 ```
 
 
-#Random Forest - Middle School
+#####Middle School
 ```{r}
-middle.train=middle.train %>% mutate_if(is.character, as.factor)
-middle.rf <- randomForest(API~., data = middle.train, mtry=6, importance=TRUE)
+middleschool.train=middleschool.train %>% mutate_if(is.character, as.factor)
+middle.rf <- randomForest(API~., data = middleschool.train, mtry=6, importance=TRUE)
 print(middle.rf)
 importance(middle.rf)
 varImpPlot(middle.rf)
 ```
 
-#Random Forest - High School
+#####High School
 ```{r}
-high.train=high.train %>% mutate_if(is.character, as.factor)
-high.rf <- randomForest(API~., data = high.train, mtry=6, importance=TRUE)
+highschool.train=highschool.train %>% mutate_if(is.character, as.factor)
+high.rf <- randomForest(API~., data = highschool.train, mtry=6, importance=TRUE)
 print(high.rf)
 importance(high.rf)
 varImpPlot(high.rf)
