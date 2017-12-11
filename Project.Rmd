@@ -34,7 +34,7 @@ library(dplyr)
 
 ```
 
-#What are the Key Determinents of School Success?
+#Question 1 - What are the Key Determinents of School Success?
 
 ## Methods
 ###Cleaning and transforming the Data
@@ -465,3 +465,29 @@ importance(high.rf)
 varImpPlot(high.rf)
 ```
 
+##Results
+** Insert answer here! **
+*Item 1
+*Item 2
+  + Item 2.1
+  + Item 2.2
+  
+# Question 2 - Do key determinants and their importance vary between school levels?
+**Answer Here **
+
+#Question 3 - Ethnic Factors and Their Importance
+
+##Are ethnic factors significant predictors of school performance? 
+**Answer Here **
+
+##Is Their importance consistent across school levels?
+**Answer Here ** 
+
+#Question 4 - Could discrepancies in performance be reduced by actively reallocating teachers’ body?
+**Answer here**
+
+#Data Limitations
+*Item 1
+*Item 2
+  +Item 2.1
+  +Item 2.2
