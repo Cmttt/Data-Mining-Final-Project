@@ -31,6 +31,7 @@ library(leaps)
 library(partykit)
 library(randomForest)
 library(dplyr)
+library(pROC)
 
 ```
 
@@ -64,59 +65,6 @@ APITransform <- function(dataset){
   return(dataset)
   }
 }
-  
-
-#Categorical Changes
- ChangeCategorical <-function(dataset){
-     if(is.data.frame(dataset)){
-        
-       #Change to numeric 
-        dataset$ACS_CORE <- as.numeric(dataset$ACS_CORE)
-      
-       #Find the median(for ACS_CORE)
-        median.ASC<- median(dataset$ACS_CORE, na.rm = TRUE)
-        max.ASC <- max(dataset$ACS_CORE,na.rm = TRUE)
-        dataset$ACS_CORE <- cut(dataset$ACS_CORE, c(1, median.ASC + 1, max.ASC),labels
-                                     = FALSE)
-        dataset$ACS_CORE[is.na(dataset$ACS_CORE)] <- 3
-      
-       #change ACS_CORE to categorical
-        dataset$ACS_CORE <- factor(dataset$ACS_CORE)
-      
-       # Change Charter
-        dataset$CHARTER[is.na(dataset$CHARTER)] <- 0
-        dataset$CHARTER[dataset$CHARTER == "Y"] <- 1
-        dataset$CHARTER[dataset$CHARTER == "D"] <- 2
-        #change Year Round
-        dataset$YR_RND[is.na(dataset$YR_RND)] <- 2
-        dataset$YR_RND[dataset$YR_RND == "Yes"] <- 0
-        dataset$YR_RND[dataset$YR_RND == "No"] <- 1
-
-        #change to categorical
-        dataset$CHARTER <- factor(dataset$CHARTER)
-        dataset$YR_RND <- factor(dataset$YR_RND)
-          
-        #Change null values to 6
-        dataset$AVG_ED[is.na(dataset$AVG_ED)] <- 6
-        dataset$AVG_ED <- as.numeric(dataset$AVG_ED)
-        dataset$AVG_ED <- round(dataset$AVG_ED, digits = 0)
-
-        dataset$AVG_ED <- as.factor(dataset$AVG_ED)
-        
-        #Converting the Columns 
-        dataset$API <- factor(dataset$API)
-        dataset$VALID <- as.numeric(dataset$VALID)
-        dataset$NUMTEACH <- as.numeric(dataset$NUMTEACH)
-        dataset$FULL_PCT <- as.numeric(dataset$FULL_PCT)
-        dataset$EMER_PCT <- as.numeric(dataset$EMER_PCT)
-        dataset$WVR_PCT <- as.numeric(dataset$WVR_PCT)
-        dataset$YRS_TEACH <- as.numeric(dataset$YRS_TEACH)
-        dataset$YRONE_TCH <- as.numeric(dataset$YRONE_TCH)
-        dataset$YRTWO_TCH <- as.numeric(dataset$YRTWO_TCH)
-       
-       return(dataset)
-     }
- }
 
 ```
 
@@ -148,7 +96,7 @@ train2 <- sample(1:nrow(middle.reg), nrow(middle.reg)/2)
 middleschool.train <- as.data.frame(middle.reg[train2,])
 
 test2 <- (-train2)
-middleschool.test <- elementary.reg[test2,]
+middleschool.test <- middle.reg[test2,]
 
 #High School
 set.seed(1)
@@ -159,6 +107,99 @@ test3 <- (-train3)
 highschool.test <- high.reg[test3,]
 
 ```
+#####Class Metrics Function 
+**Note: This is from Homework 5**
+```{r}
+classMetrics <- function(score, y, cutoff, 
+                         type = c("all", "accuracy", "sensitivity", 
+                                  "specificity", "ppv", "npv", "precision", 
+                                  "recall")) {
+  type <- match.arg(type, several.ok = TRUE)
+  n <- length(y) 
+  
+  # Form confusion matrix
+  score.factor <- factor(as.numeric(score >= cutoff), levels = c("0", "1"))
+  confusion.mat <- table(score.factor, as.factor(y), dnn = list("predicted", "observed"))
+  # Calculate all metrics
+  acc <- sum(diag(confusion.mat)) / n
+  sens <- confusion.mat[2,2] / sum(confusion.mat[,2])
+  spec <- confusion.mat[1,1] / sum(confusion.mat[,1])
+  ppv <- confusion.mat[2,2] / sum(confusion.mat[2,])
+  npv <- confusion.mat[1,1] / sum(confusion.mat[1,])
+  prec <- ppv
+  rec <- sens
+  
+  metric.names <- c("accuracy", "sensitivity", "specificity", 
+                    "ppv", "npv", "precision", "recall")
+  metric.vals <- c(acc, sens, spec, ppv, npv, prec, rec)
+  
+  # Form into data frame
+  full.df <- data.frame(value = metric.vals)
+  rownames(full.df) <- metric.names
+  
+  # Return just the requested subset of metrics
+  if(type[1] == "all") {
+    list(conf.mat = confusion.mat, perf = full.df)
+  } else {
+    list(conf.mat = confusion.mat, 
+         perf = subset(full.df, subset = metric.names %in% type))
+  }
+}
+
+plotClassMetrics <- function(score, y, xvar = NULL, yvar = c("accuracy", "sensitivity", 
+                                  "specificity", "ppv", "npv", "precision", 
+                                  "recall"),
+                             flip.x = FALSE) {
+  yvar <- match.arg(yvar)
+  
+  # If there are a lot of unique score values, just calculate the metrics
+  # along an evenly spaced grid of 100 scores.
+  unique.scores <- unique(score)
+  if(length(unique.scores) > 100) {
+    cutoff.seq <- sample(unique.scores, 100, replace = FALSE)
+  } else {
+    cutoff.seq <- unique.scores
+  }
+  
+  n <- length(cutoff.seq)
+  
+  x.out <- numeric(n)
+  y.out <- numeric(n)
+  # Loop over all values of the score and calculate the performance metrics
+  for(i in 1:n) {
+    if(!is.null(xvar)) {
+      metrics <- classMetrics(score, y, cutoff = cutoff.seq[i], type = c(xvar, yvar))
+      x.out[i] <- metrics$perf[xvar, 1]
+      y.out[i] <- metrics$perf[yvar, 1]
+    } else {
+      metrics <- classMetrics(score, y, cutoff = cutoff.seq[i], type = c(yvar))
+      x.out[i] <- cutoff.seq[i]
+      y.out[i] <- metrics$perf[yvar, 1]
+    }
+  }
+  # Combine metrics into a data frame
+  if(flip.x) {
+    x.out <- 1 - x.out
+  }
+  df.out <- data.frame(score = cutoff.seq, x = x.out, y = y.out)
+  # Reorder the data frame in increasing order of the x-axis variable
+  df.out <- df.out[order(df.out$score), ]
+  # De-duplicate x-axis
+  df.out <- subset(df.out, subset = !duplicated(df.out$x))
+  
+  # Construct line plot
+  if(!is.null(xvar)) {
+    x.text <- ifelse(flip.x, paste0("1 - ", xvar), xvar)
+  } else {
+    x.text <- "score"
+  }
+  
+  print(qplot(data = df.out, x = x, y = y, geom = "line",
+              xlab = ifelse(is.null(xvar), "score", x.text),
+              ylab = yvar, ylim = c(0, 1)))
+}
+```
+
 
 ### Models
 
@@ -420,29 +461,78 @@ treeFun <- function(dataset){
   tree.party <- as.party(tree)
   plot(tree.party, gp = gpar(fontsize = 7))
   print(tree.party)
+  return(tree)
+}
+
+treePruned <- function(tree){
+   min.cv.idx <- which.min(tree$cptable[,"xerror"])
+  # min CV error + 1se (this is the height of the horizontal bar)
+  min.cv.err.1se <- tree$cptable[min.cv.idx,"xerror"] +
+                   tree$cptable[min.cv.idx,"xstd"]
+  # Which cp values produce models whose error is below min CV + 1se?
+  cp.vals <- tree$cptable[which(tree$cptable[,"xerror"] < min.cv.err.1se),"CP"]
+
+  # 1-SE rule value of cp
+  cp.1se <- max(cp.vals)
+
+  #Prune tree
+  pruned.tree <- prune(tree, cp = cp.1se)
+  tree.party<-as.party(pruned.tree)
+  plot(tree.party, gp = gpar(fontsize = 7))
+  print(tree.party)
+  return(pruned.tree)
 }
 ```
 ##### Elementary School Tree
 ```{r}
-treeFun(elementary.train)
+elementary.tree <- treeFun(elementary.train)
+elementary.tree <- treePruned(elementary.tree)
+```
+######Elementary Confusion Matrix
+```{r}
+elem.test.prob <- predict(elementary.tree, newdata = elementary.test, type = "prob")[,"1"]
+roc.elem <- roc(elementary.test$API, elem.test.prob)   
+plot(roc.elem)
+classMetrics(elem.test.prob, elementary.test$API, cutoff = 0.4)
+
 ```
 ##### Middle School Tree
 ```{r}
-treeFun(middleschool.train)
+middle.tree <- treeFun(middleschool.train)
+middle.tree <- treePruned(middle.tree)
+```
+###### Middle School Confusion Matrix
+```{r}
+middle.test.prob <- predict(middle.tree, newdata = middleschool.test, type = "prob")[,"1"]
+roc.middle <- roc(middleschool.test$API, middle.test.prob)   
+plot(roc.middle)
+classMetrics(middle.test.prob, middleschool.test$API, cutoff = 0.4)
 ```
 ##### High School Tree
 ```{r}
-treeFun(highschool.train)
+high.tree <- treeFun(highschool.train)
+high.tree <- treePruned(high.tree)
+
+```
+###### High School Confusion Matrix
+```{r}
+high.test.prob <- predict(high.tree, newdata = highschool.test, type = "prob")[,"1"]
+roc.high <- roc(highschool.test$API, high.test.prob)   
+plot(roc.high)
+classMetrics(high.test.prob, highschool.test$API, cutoff = 0.4)
 ```
 
 #### Random Forest
 #####Elementary School
 ```{r}
 elementary.train=elementary.train %>% mutate_if(is.character, as.factor)
-elementary.rf <- randomForest(API~., data = elementary.train, mtry=6, importance=TRUE)
+elementary.test=elementary.test %>% mutate_if(is.character, as.factor)
+
+elementary.rf <- randomForest(API~., data = elementary.train, mtry=4, importance=TRUE)
 print(elementary.rf)
 importance(elementary.rf)
 varImpPlot(elementary.rf)
+predict.elem <- predict(elementary.rf, newdata = elementary.test, type = "prob")[,1]
 
 ```
 
