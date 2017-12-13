@@ -172,6 +172,7 @@ classMetrics <- function(score, y, cutoff,
   # Form confusion matrix
   score.factor <- factor(as.numeric(score >= cutoff), levels = c("0", "1"))
   confusion.mat <- table(score.factor, as.factor(y), dnn = list("predicted", "observed"))
+
   # Calculate all metrics
   acc <- sum(diag(confusion.mat)) / n
   sens <- confusion.mat[2,2] / sum(confusion.mat[,2])
@@ -268,6 +269,7 @@ ggplot(elementary.reg, aes(elementary.log$fitted.values, fill = as.factor(elemen
 
 ```
 
+**For elementary school data, the variables that are statistically significant (p < 0.05) are Charter 2(negative), Valid(positive), AA_SIGYes(negative), AS_SIGYes(positive), WH_SIGYes(positive), SD_SIGYes(negative), YR_RND2(negative),ACS_CORE3(positive),AVG_ED3(positive),AVG_ED4(positive),AVG_ED5(positive), AVG_ED6(positive), NUMTEACH(negative), and YRTWO_TCH(negative).**
 ##### Middle School
 ```{r}
 middle.log <- glm(API ~., family = binomial, data = middle.reg) 
@@ -275,6 +277,7 @@ kable(summary(middle.log)$coefficients )
 ggplot(middle.reg, aes(middle.log$fitted.values, fill = as.factor(middle.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
 ```
 
+**Middle school data is slightly different. The variables that are statistically significant (p < 0.05) are Charter 2(positive), Valid(positive), AA_SIGYes(negative), AS_SIGYes(positive), WH_SIGYes(positive), NUMTEACH(negative), and FULL_PCT(positive). **
 ##### High School
 ```{r}
 high.log <- glm(API ~., family = binomial, data = high.reg) 
@@ -282,7 +285,10 @@ kable(summary(high.log)$coefficients)
 ggplot(high.reg, aes(high.log$fitted.values, fill = as.factor(high.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
 ```
 
+**High School Data also varies from the others.The variables that are statistically significant (p < 0.05) are Valid (positive), AA_SIGYes(negative), AS_SIGYes(positive), WH_SIGYes(positive), SD_SIGYes(positive),AVG_ED4(positive),AVG_ED6(positive), and NUMTEACH(negative).**
 #### Forward Stepwise
+
+**Note: How should we select the predictors? 1SE rule? Lowest BIC?**
 ##### Function
 ```{r}
 forwardStepwise <- function(dataset,title){
@@ -309,10 +315,16 @@ forwardStepwise <- function(dataset,title){
   }
 }
 ```
-##### Results for Elementary, Middle, and High School
+##### Elementary School
 ```{r}
 elem.stepWise <- forwardStepwise(elementary.reg, "Elementary School")
+```
+##### Middle School
+```{r}
 middle.stepWise <- forwardStepwise(middle.reg,"Middle School")
+```
+##### High School
+```{r}
 high.stepWise <- forwardStepwise(high.reg, "High School")
 ```
 
@@ -474,6 +486,7 @@ high.lasso.coef[high.lasso.coef!=0]
 ```
 
 ####Classification with Naive Bayes
+**Do we take this out?**
 
 #####Elementary School
 ```{r, warning=FALSE}
@@ -540,6 +553,7 @@ treePruned <- function(tree){
 elementary.tree <- treeFun(elementary.train)
 elementary.tree <- treePruned(elementary.tree)
 ```
+**Just modeling the unpruned tree uses 3 distinct predictors. Pruning the tree based on 1SE rule narrows it down to one (Avg_Ed) **
 ######Elementary Confusion Matrix
 ```{r}
 elem.test.prob <- predict(elementary.tree, newdata = elementary.test, type = "prob")[,"1"]
