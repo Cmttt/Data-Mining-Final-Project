@@ -566,6 +566,7 @@ treePruned <- function(tree){
 ```
 ##### Elementary School Tree
 ```{r}
+#To prune or not to prune?
 elementary.tree <- treeFun(elementary.train)
 elementary.tree <- treePruned(elementary.tree)
 ```
@@ -621,6 +622,8 @@ predict.elem <- predict(elementary.rf, newdata = elementary.test, type = "prob")
 
 #####Middle School
 ```{r}
+
+#Test?
 middleschool.train=middleschool.train %>% mutate_if(is.character, as.factor)
 middle.rf <- randomForest(API~., data = middleschool.train, mtry=6, importance=TRUE)
 print(middle.rf)
@@ -630,6 +633,7 @@ varImpPlot(middle.rf)
 
 #####High School
 ```{r}
+#Test?
 highschool.train=highschool.train %>% mutate_if(is.character, as.factor)
 high.rf <- randomForest(API~., data = highschool.train, mtry=6, importance=TRUE)
 print(high.rf)
