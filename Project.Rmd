@@ -311,7 +311,7 @@ forwardStepwise <- function(dataset,title){
     plot(summary$rsq, xlab="model size", ylab="R-squared", type = "l",main = paste(title,"R-Squared", sep="\n"))
     # plot showing BIC on the y-axis and
     plot(summary$bic, xlab="Model Size", ylab="BIC",type = "l", main = paste(title,"BIC",sep="\n"))
-    return(summary)
+    return(forward)
   }
 }
 ```
@@ -319,13 +319,29 @@ forwardStepwise <- function(dataset,title){
 ```{r}
 elem.stepWise <- forwardStepwise(elementary.reg, "Elementary School")
 ```
+###### Model with Min BIC
+```{r}
+min.bic <- which.min(summary(elem.stepWise)$bic)
+coef(elem.stepWise, min.bic)
+```
 ##### Middle School
 ```{r}
 middle.stepWise <- forwardStepwise(middle.reg,"Middle School")
 ```
+
+###### Model with Min BIC
+```{r}
+min.bic <- which.min(summary(middle.stepWise)$bic)
+coef(middle.stepWise, min.bic)
+```
 ##### High School
 ```{r}
 high.stepWise <- forwardStepwise(high.reg, "High School")
+```
+######Model with Min BIC
+```{r}
+min.bic <- which.min(summary(high.stepWise)$bic)
+coef(high.stepWise, min.bic)
 ```
 
 #### Lasso
@@ -620,6 +636,7 @@ print(high.rf)
 importance(high.rf)
 varImpPlot(high.rf)
 ```
+
 
 ##Results
 ** Insert answer here! **
