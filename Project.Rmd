@@ -66,6 +66,58 @@ APITransform <- function(dataset){
   }
 }
 
+#Categorical Changes
+ ChangeCategorical <-function(dataset){
+     if(is.data.frame(dataset)){
+        
+       #Change to numeric 
+        dataset$ACS_CORE <- as.numeric(dataset$ACS_CORE)
+      
+       #Find the median(for ACS_CORE)
+        median.ASC<- median(dataset$ACS_CORE, na.rm = TRUE)
+        max.ASC <- max(dataset$ACS_CORE,na.rm = TRUE)
+        dataset$ACS_CORE <- cut(dataset$ACS_CORE, c(1, median.ASC + 1, max.ASC),labels
+                                     = FALSE)
+        dataset$ACS_CORE[is.na(dataset$ACS_CORE)] <- 3
+      
+       #change ACS_CORE to categorical
+        dataset$ACS_CORE <- factor(dataset$ACS_CORE)
+      
+       # Change Charter
+        dataset$CHARTER[is.na(dataset$CHARTER)] <- 0
+        dataset$CHARTER[dataset$CHARTER == "Y"] <- 1
+        dataset$CHARTER[dataset$CHARTER == "D"] <- 2
+        #change Year Round
+        dataset$YR_RND[is.na(dataset$YR_RND)] <- 2
+        dataset$YR_RND[dataset$YR_RND == "Yes"] <- 0
+        dataset$YR_RND[dataset$YR_RND == "No"] <- 1
+
+        #change to categorical
+        dataset$CHARTER <- factor(dataset$CHARTER)
+        dataset$YR_RND <- factor(dataset$YR_RND)
+          
+        #Change null values to 6
+        dataset$AVG_ED[is.na(dataset$AVG_ED)] <- 6
+        dataset$AVG_ED <- as.numeric(dataset$AVG_ED)
+        dataset$AVG_ED <- round(dataset$AVG_ED, digits = 0)
+
+        dataset$AVG_ED <- as.factor(dataset$AVG_ED)
+        
+        #Converting the Columns 
+        dataset$API <- factor(dataset$API)
+        dataset$VALID <- as.numeric(dataset$VALID)
+        dataset$NUMTEACH <- as.numeric(dataset$NUMTEACH)
+        dataset$FULL_PCT <- as.numeric(dataset$FULL_PCT)
+        dataset$EMER_PCT <- as.numeric(dataset$EMER_PCT)
+        dataset$WVR_PCT <- as.numeric(dataset$WVR_PCT)
+        dataset$YRS_TEACH <- as.numeric(dataset$YRS_TEACH)
+        dataset$YRONE_TCH <- as.numeric(dataset$YRONE_TCH)
+        dataset$YRTWO_TCH <- as.numeric(dataset$YRTWO_TCH)
+       
+       return(dataset)
+     }
+ }
+
 ```
 
 #####Transform Data
@@ -108,7 +160,7 @@ highschool.test <- high.reg[test3,]
 
 ```
 #####Class Metrics Function 
-**Note: This is from Homework 5**
+**Note: This metrics funtion is from homework 5**
 ```{r}
 classMetrics <- function(score, y, cutoff, 
                          type = c("all", "accuracy", "sensitivity", 
@@ -204,7 +256,7 @@ plotClassMetrics <- function(score, y, xvar = NULL, yvar = c("accuracy", "sensit
 ### Models
 
 ####Logistic regressions
-
+**In the following, we fit logistic regressions on all the grade level data separately (elementary school, middle school, and high school) and plotted API probability histograms**
 ##### Elementary School
 ```{r}
 #Logistic regression 
