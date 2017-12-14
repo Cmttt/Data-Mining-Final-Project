@@ -645,6 +645,17 @@ varImpPlot(high.rf)
 predict.high <- predict(high.rf, newdata = highschool.test, type = "prob")[,"1"]
 classMetrics(predict.high, highschool.test$API, cutoff = 0.3)
 ```
+###### Prevalence 
+```{r}
+cat("Number of 1s for elementary school \n")
+length(which(elementary.reg$API == "1")) / nrow(elementary.reg)
+
+cat("Number of 1s for middle school \n")
+length(which(middle.reg$API == "1")) / nrow(middle.reg)
+
+cat("Number of 1s for high school \n")
+length(which(high.reg$API == "1")) / nrow(high.reg)
+```
 
 
 ##Results
