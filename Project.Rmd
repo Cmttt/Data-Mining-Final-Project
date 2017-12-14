@@ -262,10 +262,12 @@ plotClassMetrics <- function(score, y, xvar = NULL, yvar = c("accuracy", "sensit
 ```{r}
 #Logistic regression 
 elementary.log <- glm(API ~., family = binomial, data = elementary.reg) 
-elemLog.summary <- summary(elementary.log)
-kable(elemLog.summary$coefficients)
 
+summary(elementary.log)
 ggplot(elementary.reg, aes(elementary.log$fitted.values, fill = as.factor(elementary.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
+
+data.frame(summary(elementary.log)$coef[summary(elementary.log)$coef[,4] <= .05, 1])
+
 
 ```
 
@@ -273,16 +275,20 @@ ggplot(elementary.reg, aes(elementary.log$fitted.values, fill = as.factor(elemen
 ##### Middle School
 ```{r}
 middle.log <- glm(API ~., family = binomial, data = middle.reg) 
-kable(summary(middle.log)$coefficients )
 ggplot(middle.reg, aes(middle.log$fitted.values, fill = as.factor(middle.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
+
+data.frame(summary(middle.log)$coef[summary(middle.log)$coef[,4] <= .05, 1])
+
 ```
 
 **Middle school data is slightly different. The variables that are statistically significant (p < 0.05) are Charter 2(positive), Valid(positive), AA_SIGYes(negative), AS_SIGYes(positive), WH_SIGYes(positive), NUMTEACH(negative), and FULL_PCT(positive). **
 ##### High School
 ```{r}
 high.log <- glm(API ~., family = binomial, data = high.reg) 
-kable(summary(high.log)$coefficients)
 ggplot(high.reg, aes(high.log$fitted.values, fill = as.factor(high.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
+
+data.frame(summary(high.log)$coef[summary(high.log)$coef[,4] <= .05, 1])
+
 ```
 
 **High School Data also varies from the others.The variables that are statistically significant (p < 0.05) are Valid (positive), AA_SIGYes(negative), AS_SIGYes(positive), WH_SIGYes(positive), SD_SIGYes(positive),AVG_ED4(positive),AVG_ED6(positive), and NUMTEACH(negative).**
