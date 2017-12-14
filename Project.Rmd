@@ -32,7 +32,6 @@ library(partykit)
 library(randomForest)
 library(dplyr)
 library(pROC)
-library(rfUtilities)
 ```
 
 #Question 1 - What are the Key Determinents of School Success?
@@ -643,7 +642,7 @@ classMetrics(predict.middle, middleschool.test$API, cutoff = 0.3)
 ```{r}
 highschool.train=highschool.train %>% mutate_if(is.character, as.factor)
 highschool.test=highschool.train %>% mutate_if(is.character, as.factor)
-high.rf <- randomForest(API~., data = highschool.train, mtry=6, importance=TRUE)
+high.rf <- randomForest(API~., data = highschool.train, mtry=4, importance=TRUE)
 print(high.rf)
 importance(high.rf)
 varImpPlot(high.rf)
@@ -664,11 +663,10 @@ length(which(high.reg$API == "1")) / nrow(high.reg)
 
 
 ##Results
-** Insert answer here! **
-*Item 1
-*Item 2
-  + Item 2.1
-  + Item 2.2
+** All the models pick AVG_ED as the most important. If you see on our Random Forests, this is the most important for all three school levels. ALso in our pruned decisions trees(based on minimum BIC): elementary and middle school only had AVG_ED, while highschool had AVG_ED and VALID). Most models also fit VALID, WH_SIG, AS_SIG, YRS_TEACH, NUMTEACH, and AS_SIG. There is some variation between the school levels which we will discuss in the next question**
+
+\n
+
   
 # Question 2 - Do key determinants and their importance vary between school levels?
 **Answer Here **
@@ -676,7 +674,7 @@ length(which(high.reg$API == "1")) / nrow(high.reg)
 #Question 3 - Ethnic Factors and Their Importance
 
 ##Are ethnic factors significant predictors of school performance? 
-**Answer Here **
+** Yes, they are. First, you can see this in our logistic regressions. WH_Sig **
 
 ##Is Their importance consistent across school levels?
 **Answer Here ** 
@@ -685,7 +683,4 @@ length(which(high.reg$API == "1")) / nrow(high.reg)
 **Answer here**
 
 #Data Limitations
-*Item 1
-*Item 2
-  +Item 2.1
-  +Item 2.2
+
