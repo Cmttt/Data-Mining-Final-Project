@@ -32,7 +32,7 @@ library(partykit)
 library(randomForest)
 library(dplyr)
 library(pROC)
-
+library(rfUtilities)
 ```
 
 #Question 1 - What are the Key Determinents of School Success?
@@ -610,35 +610,40 @@ classMetrics(high.test.prob, highschool.test$API, cutoff = 0.4)
 ```{r}
 elementary.train=elementary.train %>% mutate_if(is.character, as.factor)
 elementary.test=elementary.test %>% mutate_if(is.character, as.factor)
-
 elementary.rf <- randomForest(API~., data = elementary.train, mtry=4, importance=TRUE)
 print(elementary.rf)
 importance(elementary.rf)
 varImpPlot(elementary.rf)
-predict.elem <- predict(elementary.rf, newdata = elementary.test, type = "prob")[,1]
+predict.elem <- predict(elementary.rf, newdata = elementary.test, type = "prob")[,"1"]
+classMetrics(predict.elem, elementary.test$API, cutoff = 0.3)
+
 
 ```
 
 
 #####Middle School
 ```{r}
-
 #Test?
 middleschool.train=middleschool.train %>% mutate_if(is.character, as.factor)
-middle.rf <- randomForest(API~., data = middleschool.train, mtry=6, importance=TRUE)
+middleschool.test=middleschool.test %>% mutate_if(is.character, as.factor)
+middle.rf <- randomForest(API~., data = middleschool.train, mtry=4, importance=TRUE)
 print(middle.rf)
 importance(middle.rf)
 varImpPlot(middle.rf)
+predict.middle <- predict(middle.rf, newdata = middleschool.test, type = "prob")[,"1"]
+classMetrics(predict.middle, middleschool.test$API, cutoff = 0.3)
 ```
 
 #####High School
 ```{r}
-#Test?
 highschool.train=highschool.train %>% mutate_if(is.character, as.factor)
+highschool.test=highschool.train %>% mutate_if(is.character, as.factor)
 high.rf <- randomForest(API~., data = highschool.train, mtry=6, importance=TRUE)
 print(high.rf)
 importance(high.rf)
 varImpPlot(high.rf)
+predict.high <- predict(high.rf, newdata = highschool.test, type = "prob")[,"1"]
+classMetrics(predict.high, highschool.test$API, cutoff = 0.3)
 ```
 
 
