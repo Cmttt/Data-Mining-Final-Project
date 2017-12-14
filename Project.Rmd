@@ -263,7 +263,6 @@ plotClassMetrics <- function(score, y, xvar = NULL, yvar = c("accuracy", "sensit
 #Logistic regression 
 elementary.log <- glm(API ~., family = binomial, data = elementary.reg) 
 
-summary(elementary.log)
 ggplot(elementary.reg, aes(elementary.log$fitted.values, fill = as.factor(elementary.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
 
 data.frame(summary(elementary.log)$coef[summary(elementary.log)$coef[,4] <= .05, 1])
