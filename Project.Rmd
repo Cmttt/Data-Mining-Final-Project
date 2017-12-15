@@ -14,7 +14,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Load Librarys
+## Load Libraries
 ```{r, message = FALSE}
 library(ggplot2)
 library(plyr)
@@ -34,9 +34,69 @@ library(dplyr)
 library(pROC)
 ```
 
-#Question 1 - What are the Key Determinents of School Success?
+#Introduction
+We have three datasets (Elementary, Middle, and High) that consist of various performance parameters for California elementary, middle and high schools, collected by California Department of Education. Our measure of performance is API, which is derived from the results of the Standardized Testing and Reporting Program (STAR) and the California High School Exit Examination (CAHSEE). Our data has 17 composite features spanning 8,874 schools.In the data provided, API scores are binarized: the top 50-percentile of schools in each of the three groups is labeled as “High”, the rest as “Low” API institutions 
 
+>Problems we are addressing
+
+1. What are the Key Determinents of School Success? 
+2. Do key determinants and their importance vary between school levels? 
+3. Are ethnic factors significant predictors of school performance? Is their importance consistent across school levels?
+4. Could discrepancies in performance be reduced by actively reallocating teachers’ body?
+
+
+#Section 1
 ## Methods
+We used **predictive** methods for our analysis. 
+
+###Overview 
+
+1. **Cleaned/Transformed the data** :This is the first thing that we did. We first transformed API scores to 0,1. We also converted '?' in the API column to NAs since we couldn't find a logical meaning for it. We then dropped all the rows where the API column had NULL values. We also had a lot of issues with NULL values, so, as instructed by Dr. C, we changed NULL values to categorical variables. We also changed other variables to categorical as well. The ones we changed were
+
+      a. ACS_CORE: We changed this to a categorical variable of 0 and 1. 0 represents that they had less core courses than the median and 1 represents that they had more core courses than the median. 3 was used to represent NAs.
+      
+      b. CHARTER: We changed ?s to 0 which represents that they are not-charter schools. 1 represents that they are not funded. 2 represents that they are funded. 
+      
+      c. YR_RND: 0 = "Yes", 1 = "No", 2 = 'NA'
+      
+      d. AVG_ED: For this one, we made it categorical as well. We rounded the average education       and then turned it into a factor. 6 = 'NA'.
+      
+      e. We then converted the others to Numeric and Factors.
+
+    
+2. **Split test and training data** : We then split our training and test data to be used later in our models. We did this for all three data sets.   
+
+3. **Included Class Metrics Function** : We included the class metrics function from Homework 5 so that we could use it later. 
+
+4. **Fit Logistic Regressions** : We started with the simplist model first that we thought was appropriate. We did this on all three datasets. We did two thing with this:
+
+      a. Fit full logistic regressions: We did this on all datasets and observed the variables that were statistically significant. We found some similarities among the models. For example: in all three school levels, VALID, AA_SIGYes, AS_SIGYes, WH_SigYes, and NUMTEACH were statistically significant. There were some variations across the school levels in our logistic regressions. Elementary has additional variables that were statistically significant: CHARTER2,SD_SIGYes,YR_RND2,ACS_CORE3, AVG_ED3, AVG_ED4, AVG_ED5,AVG_ED6,and YRTWO_TEACH. Middle has additional variables that were statistically significant: CHARTER2,FULL_PCT, and YRONETCH. High also has addition variables that were statistically significant: SD_SIGYes, AVG_ED3, AVG_ED4,AVG_ED6.
+      
+      b. Confusion Matrix: For each logistic regression, we then constructed confusion matrixes for both the training data and test data for each dataset. We also got the missclassification rate for each. Our results were pretty good. The misclassification rates ranges from 0.13 to 0.19 for the school levels. The misclassification rates for the test confusion matrixes were relatively close to those for the training confusion matrixes. Although, these aren't perfect, it is still relatively good.! 
+      
+5. **Fit Forward Stepwise** : We then fit forward stepwise on all the school level data. Then, we selected the models for each with the lowest BIC. For elementary and high school, the forward stepwise selected models of 14 variables. The model for middle school selected 15. 
+
+6. **Fit Lasso** : The issue with the forward stepwise is that it has severe problems in the presence of collinearity. It also gives biased coefficients that need shrinkage. For this reason, we chose to fit Lassos on our three datasets. We did this by giguring out the minimum lambda value and predicting CV error on test. Then we determined which variables are non-zero at the 1se value of lambda. This resulted in smaller models for Middle and High datasets.
+
+7. **Naive Bayes** : We did not end up using this model, but we did it just to see how it would work. The misclassification rates ranged in 0.20s. This isn't the worst, but we found no reason to include it in the model since it didn't help us answer our project questions. 
+
+8. **Decision Trees** : We did these things: 
+
+      a. Fit unpruned decision trees on all three training datasets: This came out with some interesting models. For elementary: The variables that the tree split on were AVG_ED (twice), WH_SIG, and AS_SIG. For middle: The variables that the tree split on were AVG_ED(trice), FULL_PCT, YRS_TEACH, AS_SIG, WH_SIG, and VALID (twice). For high; The variables that the tree split on were AVG_ED, Valid, and AVG_ED again.
+      b. Fit pruned decision trees on all three training datasets: We did this based on the 1SE rule. This really narrowed things down. For elementary: the only variable tree split on was AVG_ED. The same occured for middle. For High: the only variables the tree split on was AVG_ED and VALID.
+      c. Confusion Matrix on test data: For all the models the accuracy was about 80%, which isn't bad.
+      d. Notice fault in decision trees. This didn't help us that much with picking the variables. The pruned trees ended up being a little meaningless especially with NA as a categorical variable for AVG_ED (represented by 6)
+
+9. **Random Forest** : We then ran random forests on the training data and then tested it on our test data. We came out with about 80% accuracy. We also had nice varimp plots that we found this very useful. 
+
+10. **Compare to Prevalence** :Last thing we did was get the prevelance of each data set so we could make sure we were doing okay comparatively.
+
+>Models Used
+
+1.Lasso
+
+2.Random Forest
+
 ###Cleaning and transforming the Data
 ##### Read in data and read convert values to 0/1/NA
 ```{r, warning=FALSE, message = FALSE}
@@ -158,6 +218,7 @@ test3 <- (-train3)
 highschool.test <- high.reg[test3,]
 
 ```
+
 #####Class Metrics Function 
 **Note: This metrics funtion is from homework 5**
 ```{r}
@@ -262,37 +323,96 @@ plotClassMetrics <- function(score, y, xvar = NULL, yvar = c("accuracy", "sensit
 #Logistic regression 
 elementary.log <- glm(API ~., family = binomial, data = elementary.reg) 
 
-ggplot(elementary.reg, aes(elementary.log$fitted.values, fill = as.factor(elementary.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
+#ggplot(elementary.train, aes(elementary.log$fitted.values, fill = as.factor(elementary.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
 
 data.frame(summary(elementary.log)$coef[summary(elementary.log)$coef[,4] <= .05, 1])
-
 
 ```
 
 **For elementary school data, the variables that are statistically significant (p < 0.05) are Charter 2(negative), Valid(positive), AA_SIGYes(negative), AS_SIGYes(positive), WH_SIGYes(positive), SD_SIGYes(negative), YR_RND2(negative),ACS_CORE3(positive),AVG_ED3(positive),AVG_ED4(positive),AVG_ED5(positive), AVG_ED6(positive), NUMTEACH(negative), and YRTWO_TCH(negative).**
+
+###### Confusion Matrix
+```{r}
+cat("Training Data Confusion Matrix \n")
+elementary.logit <- glm(API ~., family = binomial, data = elementary.train) 
+# Training data confusion matrix
+confusion.logit.train <- table(round(elementary.logit$fitted), elementary.logit$y)
+confusion.logit.train
+#Training data misclassification rate
+1 - sum(diag(confusion.logit.train)) / sum(confusion.logit.train)
+
+cat(" \n Test Data Confusion Matrix")
+# Test data confusion matrix
+test.probs <- predict(elementary.logit, elementary.test, type = "response")
+confusion.logit.test <- table(round(test.probs), elementary.test$API)
+confusion.logit.test
+
+# Test data misclassification rate
+1 - sum(diag(confusion.logit.test)) / sum(confusion.logit.test)
+
+```
 ##### Middle School
 ```{r}
 middle.log <- glm(API ~., family = binomial, data = middle.reg) 
-ggplot(middle.reg, aes(middle.log$fitted.values, fill = as.factor(middle.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
+#ggplot(middle.reg, aes(middle.log$fitted.values, fill = as.factor(middle.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
 
 data.frame(summary(middle.log)$coef[summary(middle.log)$coef[,4] <= .05, 1])
 
 ```
 
 **Middle school data is slightly different. The variables that are statistically significant (p < 0.05) are Charter 2(positive), Valid(positive), AA_SIGYes(negative), AS_SIGYes(positive), WH_SIGYes(positive), NUMTEACH(negative), and FULL_PCT(positive). **
+
+###### Confusion Matrix
+```{r}
+cat("Training Data Confusion Matrix \n")
+middle.logit <- glm(API ~., family = binomial, data = middleschool.train) 
+# Training data confusion matrix
+confusion.logit.train <- table(round(middle.logit$fitted), middle.logit$y)
+confusion.logit.train
+#Training data misclassification rate
+1 - sum(diag(confusion.logit.train)) / sum(confusion.logit.train)
+
+cat(" \n Test Data Confusion Matrix")
+# Test data confusion matrix
+test.probs <- predict(middle.logit, middleschool.test, type = "response")
+confusion.logit.test <- table(round(test.probs), middleschool.test$API)
+confusion.logit.test
+
+# Test data misclassification rate
+1 - sum(diag(confusion.logit.test)) / sum(confusion.logit.test)
+```
 ##### High School
 ```{r}
 high.log <- glm(API ~., family = binomial, data = high.reg) 
-ggplot(high.reg, aes(high.log$fitted.values, fill = as.factor(high.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
+#ggplot(high.reg, aes(high.log$fitted.values, fill = as.factor(high.log$y))) + geom_histogram() + labs(fill = "API", title = "Estimated API Probabilities Histogram", x = "Estimated API Probabilities") + theme_classic()
 
 data.frame(summary(high.log)$coef[summary(high.log)$coef[,4] <= .05, 1])
 
 ```
 
 **High School Data also varies from the others.The variables that are statistically significant (p < 0.05) are Valid (positive), AA_SIGYes(negative), AS_SIGYes(positive), WH_SIGYes(positive), SD_SIGYes(positive),AVG_ED4(positive),AVG_ED6(positive), and NUMTEACH(negative).**
+######Confusion Matrix
+```{r}
+cat("Training Data Confusion Matrix \n")
+high.logit <- glm(API ~., family = binomial, data = highschool.train) 
+# Training data confusion matrix
+confusion.logit.train <- table(round(high.logit$fitted), high.logit$y)
+confusion.logit.train
+#Training data misclassification rate
+1 - sum(diag(confusion.logit.train)) / sum(confusion.logit.train)
+
+cat(" \n Test Data Confusion Matrix")
+# Test data confusion matrix
+test.probs <- predict(high.logit, highschool.test, type = "response")
+confusion.logit.test <- table(round(test.probs), highschool.test$API)
+confusion.logit.test
+
+# Test data misclassification rate
+1 - sum(diag(confusion.logit.test)) / sum(confusion.logit.test)
+```
+
 #### Forward Stepwise
 
-**Note: How should we select the predictors? 1SE rule? Lowest BIC?**
 ##### Function
 ```{r}
 forwardStepwise <- function(dataset,title){
@@ -404,7 +524,6 @@ elem.lasso.coef[elem.lasso.coef!=0]
 ```
 
 
-
 #####Middle School
 ```{r}
 #removing all rows where API is null
@@ -506,7 +625,6 @@ high.lasso.coef[high.lasso.coef!=0]
 ```
 
 ####Classification with Naive Bayes
-**Do we take this out?**
 
 #####Elementary School
 ```{r, warning=FALSE}
@@ -580,7 +698,7 @@ elementary.tree <- treePruned(elementary.tree)
 elem.test.prob <- predict(elementary.tree, newdata = elementary.test, type = "prob")[,"1"]
 roc.elem <- roc(elementary.test$API, elem.test.prob)   
 plot(roc.elem)
-classMetrics(elem.test.prob, elementary.test$API, cutoff = 0.4)
+classMetrics(elem.test.prob, elementary.test$API, cutoff = 0.5)
 
 ```
 ##### Middle School Tree
@@ -661,26 +779,24 @@ cat("Number of 1s for high school \n")
 length(which(high.reg$API == "1")) / nrow(high.reg)
 ```
 
-
-##Results
-** All the models pick AVG_ED as the most important. If you see on our Random Forests, this is the most important for all three school levels. ALso in our pruned decisions trees(based on minimum BIC): elementary and middle school only had AVG_ED, while highschool had AVG_ED and VALID). Most models also fit VALID, WH_SIG, AS_SIG, YRS_TEACH, NUMTEACH, and AS_SIG. There is some variation between the school levels which we will discuss in the next question**
-
-\n
-
+#Answers to Questions
+##Question 1 - What are the Key Determinents of School Success?
+** All the models pick AVG_ED as the most important. If you see on our Random Forests, this is the most important for all three school levels. ALso in our pruned decisions trees(based on minimum BIC): elementary and middle school only had AVG_ED, while highschool had AVG_ED and VALID). Most models also fit VALID, WH_SIG, AS_SIG, YRS_TEACH, NUMTEACH, and AS_SIG. There is some variation between the school levels which we will discuss in the next question **
   
-# Question 2 - Do key determinants and their importance vary between school levels?
+## Question 2 - Do key determinants and their importance vary between school levels?
 **Answer Here **
 
-#Question 3 - Ethnic Factors and Their Importance
+##Question 3 - Ethnic Factors and Their Importance
 
-##Are ethnic factors significant predictors of school performance? 
-** Yes, they are. First, you can see this in our logistic regressions. WH_Sig **
+###Are ethnic factors significant predictors of school performance? 
+** Based off of our random forest model, ethnic factors are significant predictors of school performance.  **
 
-##Is Their importance consistent across school levels?
+###Is Their importance consistent across school levels?
 **Answer Here ** 
 
-#Question 4 - Could discrepancies in performance be reduced by actively reallocating teachers’ body?
+##Question 4 - Could discrepancies in performance be reduced by actively reallocating teachers’ body?
 **Answer here**
 
-#Data Limitations
+##Data Limitations
+**There are some limitations with this data. First of all, We didn't like how the scores were ranked "Low" and "High". This means that there is a cutoff and we are not considering the people right at the end or beginning of the cutoff. For example: If the cutoff score is 50, we are categorizing people who made 49 differently even though they might be the same as those who made 50. Also, we are testing different tests among different school levels, so it's hard to compare across them. In addition to the issues states above, there were too many NULL values. Some of the findings we got were useless because it involved a categorical variable that represented 'NA'**
 
