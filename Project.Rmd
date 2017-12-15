@@ -1,6 +1,6 @@
 ---
 title: "Data Mining Project"
-author: "Nadine Fares, Leyang Shi, Bai Xue"
+author: "Nadine Fares, Leyang Shi, Bai Xue (#DownForWhatever)"
 date: "12/8/2017"
 output: 
   html_document:
