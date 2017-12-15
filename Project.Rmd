@@ -59,7 +59,7 @@ We used **predictive** methods for our analysis.
       
       c. YR_RND: 0 = "Yes", 1 = "No", 2 = 'NA'
       
-      d. AVG_ED: For this one, we made it categorical as well. We rounded the average education and then turned it into a factor. 6 = 'NA'.
+      d. AVG_ED: For this one, we made it categorical as well. This corresponds well with the variable, because in the prompt, parent educational level responses for the school are averaged and based on the following scale: 1 = Not high school graduate, 2 = High school graduate, 3 = Some college, 4 = College graduate, 5 = Graduate school/post graduate training.  We rounded the average education and then turned it into a factor. 6 = 'NA'.
       
       e. We then converted the others to Numeric and Factors.
 
@@ -68,15 +68,15 @@ We used **predictive** methods for our analysis.
 
 3. **Included Class Metrics Function** : We included the class metrics function from Homework 5 so that we could use it later. 
 
-4. **Fit Logistic Regressions** : We started with the simplist model first that we thought was appropriate. We did this on all three datasets. We did two thing with this:
+4. **Fit Logistic Regressions** : We started with the simplest model first that we thought was appropriate. We did this on all three datasets. We did two thing with this:
 
       a. Fit full logistic regressions: We did this on all datasets and observed the variables that were statistically significant. We found some similarities among the models. For example: in all three school levels, VALID, AA_SIGYes, AS_SIGYes, WH_SigYes, and NUMTEACH were statistically significant. There were some variations across the school levels in our logistic regressions. Elementary has additional variables that were statistically significant: CHARTER2,SD_SIGYes,YR_RND2,ACS_CORE3, AVG_ED3, AVG_ED4, AVG_ED5,AVG_ED6,and YRTWO_TEACH. Middle has additional variables that were statistically significant: CHARTER2,FULL_PCT, and YRONETCH. High also has addition variables that were statistically significant: SD_SIGYes, AVG_ED3, AVG_ED4,AVG_ED6.
       
-      b. Confusion Matrix: For each logistic regression, we then constructed confusion matrixes for both the training data and test data for each dataset. We also got the missclassification rate for each. Our results were pretty good. The misclassification rates ranges from 0.13 to 0.19 for the school levels. The misclassification rates for the test confusion matrixes were relatively close to those for the training confusion matrixes. Although, these aren't perfect, it is still relatively good.! 
+      b. Confusion Matrix: For each logistic regression, we then constructed confusion matrixes for both the training data and test data for each dataset. We also got the missclassification rate for each. Our results were pretty good. The misclassification rates ranges from 0.13 to 0.19 for the school levels. The misclassification rates for the test confusion matrixes were relatively close to those for the training confusion matrixes. Although, these aren't perfect, it is still relatively good! 
       
 5. **Fit Forward Stepwise** : We then fit forward stepwise on all the school level data. Then, we selected the models for each with the lowest BIC. For elementary and high school, the forward stepwise selected models of 14 variables. The model for middle school selected 15. 
 
-6. **Fit Lasso** : The issue with the forward stepwise is that it has severe problems in the presence of collinearity. It also gives biased coefficients that need shrinkage. For this reason, we chose to fit Lassos on our three datasets. We did this by giguring out the minimum lambda value and predicting CV error on test. Then we determined which variables are non-zero at the 1se value of lambda. This resulted in smaller models for Middle and High datasets.
+6. **Fit Lasso** : The issue with the forward stepwise is that it has severe problems in the presence of collinearity. It also gives biased coefficients that need shrinkage. For this reason, we chose to fit Lassos on our three datasets. We did this by figuring out the minimum lambda value and predicting CV error on the test. Then we determined which variables are non-zero at the 1se value of lambda. This resulted in smaller models for Middle and High datasets.
 
 7. **Naive Bayes** : We did not end up using this model, but we did it just to see how it would work. The misclassification rates ranged in 0.20s. This isn't the worst, but we found no reason to include it in the model since it didn't help us answer our project questions. 
 
@@ -781,7 +781,7 @@ length(which(high.reg$API == "1")) / nrow(high.reg)
 
 #Section 2: Key Findings, Main Takeaways
 ##Question 1 - What are the Key Determinents of School Success?
-#Question 1
+
 
 Statistically Significant Variables
 Logistic Regression
@@ -967,8 +967,8 @@ NUMTEACH
 **They are relatively consistent. For elementary school, WH_SIG reports 20 (ranked 2nd)  for the first measure and 85 (ranked 4th) for the second measure. This means that when WH_SIG is excluded from the model, the mean decrease of accuracy of our model is 20; when the model is split over WH_SIG, the mean decrease of node purity is 85. Similarly, AS_SIG decreases the mean accuracy of our model by 3 (ranked 4th) and node purity by 5 (11th) at the elementary level. For middle School, WH_SIG reports 10 (ranked 2nd) for the first measure and 7 (ranked 2nd) for the second. AS_SIG reports 4 (ranked 6th) for the first and 3 (ranked 10th) for the second. For high school, WH_SIG reports 2 (ranked 3rd) for the first measure and 2 (ranked 6th)  for the second. AS_SIG reports 4 (ranked 4th)  for the first and 7(ranked 10th) for the second. In all, WH_SIG is consistently significant across all school levels based on both measures; AS_SIG appears significant for the elementary and high school level based on one of the measure.** 
 
 ##Question 4 - Could discrepancies in performance be reduced by actively reallocating teachers’ body?
-**Answer here**
+**Yes, we think it could. For elementary school, YRS_TEACH, which is the average number of years that all teachers have been instructing students has a statistically significant and positive coefficient. Number of Year one teachers and number of year two teachers have a statistically significant and negative coefficient. For middle school, Number of year one teachers has a statistically significant and negative coefficient and FULL_PCT, which is percentage of teachers who have completed a teacher preparation program, has a statistically significant positive coefficient. This shows that, for elementary and middle schools, we could allocate more experienced teachers and teachers who have completed a prep program. It's interesting because teachers don't have a statistically significant affect on API scores in high schools.**
 
 ##Data Limitations
-**There are some limitations with this data. First of all, We didn't like how the scores were ranked "Low" and "High". This means that there is a cutoff and we are not considering the people right at the end or beginning of the cutoff. For example: If the cutoff score is 50, we are categorizing people who made 49 differently even though they might be the same as those who made 50. Also, we are testing different tests among different school levels, so it's hard to compare across them. In addition to the issues states above, there were too many NULL values. Some of the findings we got were useless because it involved a categorical variable that represented 'NA'**
+**There are some limitations with this data. First of all, We didn't like how the scores were ranked "Low" and "High". This means that there is a cutoff and we are not considering the people right at the end or beginning of the cutoff. For example: If the cutoff score is 50, we are categorizing people who made 49 differently even though they might be the same as those who made 50. Also, we are testing different API tests among different school levels, so it's hard to compare across them. In addition to the issues stated above, there were too many NULL values. Some of the findings we got were useless because it involved a categorical variable that represented 'NA', which hurts the interpretation of our variable selection models.**
 
