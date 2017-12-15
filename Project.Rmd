@@ -961,10 +961,10 @@ NUMTEACH
 ##Question 3 - Ethnic Factors and Their Importance
 
 ###Are ethnic factors significant predictors of school performance? 
-** Based off of our random forest model, ethnic factors are significant predictors of school performance.  **
+**Based off of our random forest model, ethnic factors are significant predictors of school performance. As suggested by the variable importance plots based on our Random Forrest model, the variable indicating significance of number of white students (WH_SIG) is one of the most important variables based on two measures: % increase in Accuracy and % increase in node purity. Another ethnic predictor that is consistently significant is significance of number of asian students (AS_SIG). There is slight variation between school levels and will be discussed in the answer to next question.**
 
 ###Is Their importance consistent across school levels?
-**Answer Here ** 
+**They are relatively consistent. For elementary school, WH_SIG reports 20 (ranked 2nd)  for the first measure and 85 (ranked 4th) for the second measure. This means that when WH_SIG is excluded from the model, the mean decrease of accuracy of our model is 20; when the model is split over WH_SIG, the mean decrease of node purity is 85. Similarly, AS_SIG decreases the mean accuracy of our model by 3 (ranked 4th) and node purity by 5 (11th) at the elementary level. For middle School, WH_SIG reports 10 (ranked 2nd) for the first measure and 7 (ranked 2nd) for the second. AS_SIG reports 4 (ranked 6th) for the first and 3 (ranked 10th) for the second. For high school, WH_SIG reports 2 (ranked 3rd) for the first measure and 2 (ranked 6th)  for the second. AS_SIG reports 4 (ranked 4th)  for the first and 7(ranked 10th) for the second. In all, WH_SIG is consistently significant across all school levels based on both measures; AS_SIG appears significant for the elementary and high school level based on one of the measure.** 
 
 ##Question 4 - Could discrepancies in performance be reduced by actively reallocating teachers’ body?
 **Answer here**

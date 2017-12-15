@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="Nadine Fares, Leyang Shi, Bai Xue" />
+<meta name="author" content="Nadine Fares, Leyang Shi, Bai Xue (#DownForWhatever)" />
 
 
 <title>Data Mining Project</title>
@@ -145,7 +145,7 @@ $(document).ready(function () {
 
 
 <h1 class="title toc-ignore">Data Mining Project</h1>
-<h4 class="author"><em>Nadine Fares, Leyang Shi, Bai Xue</em></h4>
+<h4 class="author"><em>Nadine Fares, Leyang Shi, Bai Xue (#DownForWhatever)</em></h4>
 <h4 class="date"><em>12/8/2017</em></h4>
 
 </div>
@@ -170,6 +170,8 @@ $(document).ready(function () {
 </ul></li>
 <li><a href="#section-2-key-findings-main-takeaways">Section 2: Key Findings, Main Takeaways</a><ul>
 <li><a href="#question-1---what-are-the-key-determinents-of-school-success">Question 1 - What are the Key Determinents of School Success?</a></li>
+</ul></li>
+<li><a href="#question-1">Question 1</a><ul>
 <li><a href="#question-2---do-key-determinants-and-their-importance-vary-between-school-levels">Question 2 - Do key determinants and their importance vary between school levels?</a></li>
 <li><a href="#question-3---ethnic-factors-and-their-importance">Question 3 - Ethnic Factors and Their Importance</a><ul>
 <li><a href="#are-ethnic-factors-significant-predictors-of-school-performance">Are ethnic factors significant predictors of school performance?</a></li>
@@ -246,7 +248,7 @@ $(document).ready(function () {
 <li>Confusion Matrix on test data: For all the models the accuracy was about 80%, which isn’t bad.</li>
 <li>Notice fault in decision trees. This didn’t help us that much with picking the variables. The pruned trees ended up being a little meaningless especially with NA as a categorical variable for AVG_ED (represented by 6)</li>
 </ol></li>
-<li><p><strong>Random Forest</strong> : We then ran random forests on the training data and then tested it on our test data. We came out with about 80% accuracy. We also had nice varimp plots that we found this very useful.</p></li>
+<li><p><strong>Random Forest</strong> : We then ran random forests on the training data and then tested it on our test data. We came out with about 80% accuracy. We also had nice variable importance plots that we found this very useful.</p></li>
 <li><p><strong>Compare to Prevalence</strong> :Last thing we did was get the prevelance of each data set so we could make sure we were doing okay comparatively.</p></li>
 </ol>
 <blockquote>
@@ -1856,21 +1858,47 @@ high.rf &lt;-<span class="st"> </span><span class="kw">randomForest</span>(API<s
 <h1>Section 2: Key Findings, Main Takeaways</h1>
 <div id="question-1---what-are-the-key-determinents-of-school-success" class="section level2">
 <h2>Question 1 - What are the Key Determinents of School Success?</h2>
-<p>** All the models pick AVG_ED as the most important. If you see on our Random Forests, this is the most important for all three school levels. ALso in our pruned decisions trees(based on minimum BIC): elementary and middle school only had AVG_ED, while highschool had AVG_ED and VALID). Most models also fit VALID, WH_SIG, AS_SIG, YRS_TEACH, NUMTEACH, and AS_SIG. There is some variation between the school levels which we will discuss in the next question **</p>
 </div>
+</div>
+<div id="question-1" class="section level1">
+<h1>Question 1</h1>
+<p>Statistically Significant Variables Logistic Regression Elementary: Charter 2 Valid AA_SIGYes AS_SIG_Yes WH_SIGYes SD_SIGYes YR_RND2 ACS_CORE3 AVG_ED3 AVG_ED4 AVG_ED5 AVG_ED6 NUMTEACH YRTWO_TCH</p>
+<p>Middle: Charter 2 Valid AA_SIGYes AS_SIGYes WH_SIGYes SD_SIGYes YR_RND2 ACS_CORE3 AVG_ED3 AVG_ED4 AVG_ED5 AVG_ED6 NUMTEACH YRTWO_TCH</p>
+<p>High: VALID<br />
+AA_SIGYes<br />
+AS_SIGYes<br />
+WH_SIGYes<br />
+SD_SIGYes<br />
+AVG_ED3<br />
+AVG_ED4<br />
+AVG_ED6<br />
+NUMTEACH</p>
+<p>Forward Stepwise Selection: Elementary: Charter2 AA_SIGYes AS_SIGYes WH_SIGYes SD_SIGYes YR_RND2 ACS_CORE2 ACS_CORE3 AVG_ED2 AVG_ED3 AVG_ED4 AVG_ED5 AVG_ED6 YRTWO_TCH</p>
+<p>Middle: Charter2 Valid AA_SIGYes AS_SIGYes HI_SIGYes WH_SIGYes ACS_CORE2 AVG_ED2 AVG_ED3 AVG_ED4 AVG_ED5 AVG_ED6 NUMTEACH FULL_PCT YRONE_TCH</p>
+<p>High: VALID AA_SIGYes AS_SIGYes WH_SIGYes SD_SIGYes YR_RND1 AVG_ED2 AVG_ED3 AVG_ED4 AVG_ED5 AVG_ED6 NUMTEACH EMER_PCT YRONE_TCH</p>
+<p>Lasso Elementary: Charter2 AA_SIGYes AS_SIGYes WH_SIGYes SD_SIGYes YR_RND2 ACS_CORE3 AVG_ED2 AVG_ED3 AVG_ED4 AVG_ED5 YRS_TEACH YRONE_TCH TRTWO_TCH</p>
+<p>Middle: Charter2 AA_SIGYes AS_SIGYes HI_SIGYes WH_SIGYes ACS_Core2 AVG_ED2 AVG_ED4 FULL_PCT YRONE_TCH</p>
+<p>High: AA_SIGYes AS_SIGYes WH_SIGYes SD_SIGYes YR_RND1 AVG_ED2 AVG_ED4 EMER_PCT</p>
+<p>Pruned Tree: Elementary: AVG_ED</p>
+<p>Middle AVG_ED</p>
+<p>High AVG_ED Valid</p>
+<p>Random Forest Elementary: (In order of importance) AVG_ED WH_SIG NUMTEACH VALID AS_SIG SD_SIG</p>
+<p>Middle: (In order of importance) AVG_ED WH_SIG FULL_PCT HI_SIG VALID AS_SIG</p>
+<p>High: (In order of importance) AVG_ED VALID WH_SIG AS_SIG FULL_PCT NUMTEACH</p>
+<p><strong>Across all of our models, AVG_ED is the most important. If you see on our Random Forests, this is the most important factor for all three school levels. ALso in our pruned decisions trees(based on minimum BIC): elementary and middle school only had AVG_ED, while highschool had AVG_ED and VALID). Additionally, in our variable selection models (Logistic Regression, Forward Stepwise Selection, and Lasso), AVG_ED, CHARTER2, VALID, WH_SIG, AS_SIG, YRTWO_TEACH, YRS_TEACH, NUMTEACH, and AS_SIG were the most common variables being selected across all school levels. There is some variation between the school levels which we will discuss in the next question. Ultimately, the model we decided to choose was our Random Forests because it managed to acheive 80% accuracy for predicting the elementary and middle school data and 97% accuracy for high school data. This is in comparison to the roughly 70% accuracy across all levels using our Naive Bayes model and our pruned trees. Additionally, Random Forests have a reputation of not overfitting, so we believe that it is the best classifier model for this dataset. Under our selected model, the most important variable factors are AVG_ED, Valid, WH_SIG, AS_SIG, NUMTEACH and FULL_PCT.</strong></p>
 <div id="question-2---do-key-determinants-and-their-importance-vary-between-school-levels" class="section level2">
 <h2>Question 2 - Do key determinants and their importance vary between school levels?</h2>
-<p><strong>Answer Here </strong></p>
+<p><strong>The key determinants and their importance do vary slightly between school levels. Under our Random Forest model, most variables stay the same between school levels. AVG_ED, WH_SIG, AS_SIG, and VALID show up across all levels. NUMTEACH is significant in both high and elementary. FULL_PCT shows up in both middle and high school. When we look at our logistic regression, forward stepwise selection, and lasso models, we can see that the teacher variables (YRS_TEACH, NUMTEACH, YRTWO_TEACH, YRONE_TEACH) show up significantly more often during elementary and middle school. This seems to imply that the quality and experience of teachers are more important in early education than later education. Additionally, Charter2 (Which indicates funded-Charter schools) are more of a determining factor for elementary and middle schools. This variable is not important for high schools.</strong></p>
 </div>
 <div id="question-3---ethnic-factors-and-their-importance" class="section level2">
 <h2>Question 3 - Ethnic Factors and Their Importance</h2>
 <div id="are-ethnic-factors-significant-predictors-of-school-performance" class="section level3">
 <h3>Are ethnic factors significant predictors of school performance?</h3>
-<p>** Based off of our random forest model, ethnic factors are significant predictors of school performance. **</p>
+<p>** Based off of our random forest model, ethnic factors are significant predictors of school performance. As suggested by the variable importance plots based on our Random Forrest model, the variable indicating significance of number of white students (WH_SIG) is one of the most important variables based on two measures: % increase in Accuracy and % increase in node purity. Another ethnic predictor that is consistently significant is significance of number of asian students (AS_SIG). There is slight variation between school levels and will be discussed in the answer to next question.**</p>
 </div>
 <div id="is-their-importance-consistent-across-school-levels" class="section level3">
 <h3>Is Their importance consistent across school levels?</h3>
-<p><strong>Answer Here </strong></p>
+<p><strong>They are relatively consistent. For elementary school, WH_SIG reports 20 (ranked 2nd) for the first measure and 85 (ranked 4th) for the second measure. This means that when WH_SIG is excluded from the model, the mean decrease of accuracy of our model is 20; when the model is split over WH_SIG, the mean decrease of node purity is 85. Similarly, AS_SIG decreases the mean accuracy of our model by 3 (ranked 4th) and node purity by 5 (11th) at the elementary level. For middle School, WH_SIG reports 10 (ranked 2nd) for the first measure and 7 (ranked 2nd) for the second. AS_SIG reports 4 (ranked 6th) for the first and 3 (ranked 10th) for the second. For high school, WH_SIG reports 2 (ranked 3rd) for the first measure and 2 (ranked 6th) for the second. AS_SIG reports 4 (ranked 4th) for the first and 7(ranked 10th) for the second. In all, WH_SIG is consistently significant across all school levels based on both measures; AS_SIG appears significant for the elementary and high school level based on one of the measure.</strong></p>
 </div>
 </div>
 <div id="question-4---could-discrepancies-in-performance-be-reduced-by-actively-reallocating-teachers-body" class="section level2">
