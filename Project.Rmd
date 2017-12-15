@@ -779,7 +779,7 @@ cat("Number of 1s for high school \n")
 length(which(high.reg$API == "1")) / nrow(high.reg)
 ```
 
-#Answers to Questions
+#Section 2: Key Findings, Main Takeaways
 ##Question 1 - What are the Key Determinents of School Success?
 ** All the models pick AVG_ED as the most important. If you see on our Random Forests, this is the most important for all three school levels. ALso in our pruned decisions trees(based on minimum BIC): elementary and middle school only had AVG_ED, while highschool had AVG_ED and VALID). Most models also fit VALID, WH_SIG, AS_SIG, YRS_TEACH, NUMTEACH, and AS_SIG. There is some variation between the school levels which we will discuss in the next question **
   
