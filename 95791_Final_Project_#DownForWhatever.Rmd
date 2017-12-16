@@ -783,8 +783,9 @@ length(which(high.reg$API == "1")) / nrow(high.reg)
 ##Question 1 - What are the Key Determinents of School Success?
 
 
-Statistically Significant Variables
-Logistic Regression
+**Statistically Significant Variables**
+
+**Logistic Regression:**
 Elementary:
 Charter 2
 Valid
@@ -828,7 +829,7 @@ AVG_ED4
 AVG_ED6			
 NUMTEACH
 
-Forward Stepwise Selection:
+**Forward Stepwise Selection:**
 Elementary:
 Charter2
 AA_SIGYes
@@ -878,7 +879,7 @@ NUMTEACH
 EMER_PCT
 YRONE_TCH
 
-Lasso
+**Lasso:**
 Elementary:
 Charter2
 AA_SIGYes
@@ -917,7 +918,7 @@ AVG_ED2
 AVG_ED4
 EMER_PCT
 
-Pruned Tree:
+**Pruned Tree:**
 Elementary:
 AVG_ED
 
@@ -928,7 +929,7 @@ High
 AVG_ED
 Valid
 
-Random Forest
+**Random Forest:**
 Elementary: (In order of importance)
 AVG_ED
 WH_SIG
